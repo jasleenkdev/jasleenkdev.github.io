@@ -82,8 +82,8 @@
 	</div>
 
 	<!-- data-bg marks "empty paper": the page gutters, the blank space in the header and
-	     the gaps around the collage. Clicking/tapping it reshuffles — anywhere above the
-	     static lower zone (projects and below). -->
+	     the gaps between sections. Clicking/tapping empty paper reshuffles the doodles
+	     and the collage blocks. -->
 	<main class="board" data-bg>
 
 		<!-- =================================================================
@@ -106,100 +106,52 @@
 		</header>
 
 		<!-- =================================================================
-		     UPPER SHUFFLE ZONE — text blocks and photos mixed together
-		     Click / tap any empty paper level with this zone and every block
-		     marked data-shuffle (plus the doodles) glides to a new spot inside
-		     it. Remove data-shuffle from a block to pin it in place.
-
-		     Home layout on wide screens: every block is pinned to a 12-column
-		     grid with
-		         style="--place: ROW / COLUMN / span ROWS / span COLUMNS"
-		     Rows are ~30px tall and grow if the content needs more room, so
-		     longer text pushes things down instead of overlapping.
-		     On phones/tablets the blocks flow in the order written below
-		     (photos pair up side by side, so keep them in twos).
-
-		     Photos: swap src / alt and the hover caption. Each gets a random
-		     tilt; to fix one, add --rot (e.g. --rot: -4deg) to its style.
-		     Placeholder photos come from picsum.photos.
-		     ================================================================= -->
-		<section class="collage" data-zone="shuffle" aria-label="About me and photos" data-bg>
-
-			<!-- NOW BOX — what you're up to right now -->
-			<section class="now-box" data-shuffle aria-labelledby="now-title" style="--place: 1 / 1 / span 6 / span 5">
-				<h2 class="now-title" id="now-title">now: <span class="now-dot" aria-hidden="true"></span></h2>
-				<ul class="now-list">
-					<!-- EDIT ME -->
-					<li><b>building</b> my way through agents, LLMs, and whatever breaks next</li>
-					<li><b>trying</b> to run 5k sub 30</li>
-					<li><b>listening to</b> daft punk, tame imphala, beach house, sufjan stevens, moby</li>
-				</ul>
-			</section>
-
-			<figure class="polaroid" data-shuffle tabindex="0" style="--place: 2 / 6 / span 14 / span 3">
-				<img src="me.png" alt="Portrait of Jasleen" width="480" height="600">
-				<div class="polaroid-caption">that's me! <!-- EDIT ME --></div>
-			</figure>
-
-			<figure class="polaroid" data-shuffle tabindex="0" style="--place: 8 / 1 / span 14 / span 3">
-				<!-- EDIT ME: photo + caption -->
-				<img src="images/yosemite.jpg" alt="Yosemite valley view" width="480" height="600" loading="lazy">
-				<div class="polaroid-caption">Kyoto, Japan</div>
-			</figure>
-			
-			<!-- BIO BLURB — colour variants: callout--yellow / pink / mint / blue / peach / lilac -->
-			<article class="callout callout--yellow" data-shuffle style="--place: 4 / 9 / span 7 / span 4; --tilt: 1deg">
-				<h3 class="callout-label">about me</h3>
-				<p>CSE student at Thapar Institute of Engineering &amp; Technology, exploring SDE and AI/ML roles. Open to internship / full-time opportunities in India. <!-- EDIT ME --></p>
-			</article>
-			
-			<figure class="polaroid polaroid--small" data-shuffle tabindex="0" style="--place: 9 / 4 / span 8 / span 2">
-				<!-- EDIT ME: photo + caption -->
-				<img src="images/photo2.jpg" alt="Photo" width="400" height="400" loading="lazy">
-				<div class="polaroid-caption">Dharamshala, India</div>
-			</figure>
-			
-			<figure class="polaroid polaroid--small" data-shuffle tabindex="0" style="--place: 12 / 10 / span 8 / span 2">
-				<!-- EDIT ME: photo + caption -->
-				<img src="images/photo4.jpg" alt="Photo" width="400" height="400" loading="lazy">
-				<div class="polaroid-caption">Mount Fuji, Japan</div>
-			</figure>
-
-			<article class="callout callout--mint" data-shuffle style="--place: 17 / 4 / span 7 / span 5; --tilt: -0.8deg">
-				<h3 class="callout-label">off the clock</h3>
-				<p>
-					Running<br>
-					Lifting<br>
-					Dreaming of directing films in Japan
-				</p>
-			</article>
-
-			<figure class="polaroid polaroid--small" data-shuffle tabindex="0" style="--place: 23 / 1 / span 10 / span 3">
-				<!-- EDIT ME: photo + caption -->
-				<img src="images/photo3.jpg" alt="Placeholder photo" width="400" height="400" loading="lazy">
-				<div class="polaroid-caption">Bir, India</div>
-			</figure>
-
-			<figure class="polaroid polaroid--small" data-shuffle tabindex="0" style="--place: 21 / 10 / span 11 / span 3">
-				<!-- EDIT ME: photo + caption -->
-				<img src="images/photo1.jpg" alt="Placeholder photo" width="400" height="400" loading="lazy">
-				<div class="polaroid-caption">Google, Hyderabad</div>
-			</figure>
-
-			<!-- QUOTE / LINK BOX — a boxed phrase that links somewhere -->
-			<a class="quote-box taped" data-shuffle href="https://in.pinterest.com/pin/19281104652761010/" target="_blank" rel="noopener noreferrer" style="--place: 25 / 5 / span 7 / span 5">
-				<!-- EDIT ME: quote + link -->
-				<span class="quote-text">“  फ़ितूर और जुनून”</span>
-				<span class="quote-meta">→ quote to live by ↗</span>
-			</a>
-		</section>
-
-		<!-- =================================================================
-		     STATIC LOWER ZONE — projects, cities, links, footer
-		     Nothing in here moves, and clicking the paper around it does
-		     nothing. (display: contents keeps these in the page grid.)
+		     STATIC ZONE — links, projects, cities
+		     Nothing in here moves when the collage shuffles.
+		     (display: contents keeps these sections in the page grid.)
 		     ================================================================= -->
 		<div class="static-zone" data-zone="static">
+
+			<!-- =============================================================
+			     LINKS — each item fades in upward (animate.css fadeInUp)
+			     Swap the hrefs; --delay staggers the entrance.
+			     ============================================================= -->
+			<section class="links" aria-labelledby="links-title">
+				<h2 class="section-title" id="links-title">links</h2>
+				<ul class="social">
+					<li class="social-item" style="--delay: 0ms; --c: var(--blue)">
+						<a href="https://www.linkedin.com/in/jasleenkalra06/" target="_blank" rel="noopener noreferrer">
+							<span class="social-icon"><i class="fa-brands fa-linkedin-in" aria-hidden="true"></i></span>
+							<span class="social-text">linkedin</span>
+						</a>
+					</li>
+					<li class="social-item" style="--delay: 120ms; --c: var(--mint)">
+						<a href="https://github.com/jasleenkdev" target="_blank" rel="noopener noreferrer">
+							<span class="social-icon"><i class="fa-brands fa-github" aria-hidden="true"></i></span>
+							<span class="social-text">github</span>
+						</a>
+					</li>
+					<li class="social-item" style="--delay: 240ms; --c: var(--yellow)">
+						<a href="https://vsco.co/thebeauty0f/gallery" target="_blank" rel="noopener noreferrer">
+							<span class="social-icon"><i class="fa-solid fa-camera-retro" aria-hidden="true"></i></span>
+							<span class="social-text">vsco</span>
+						</a>
+					</li>
+					<li class="social-item" style="--delay: 360ms; --c: var(--pink)">
+						<!-- EDIT ME: your Instagram handle -->
+						<a href="https://www.instagram.com/goluubombshell/" target="_blank" rel="noopener noreferrer">
+							<span class="social-icon"><i class="fa-brands fa-instagram" aria-hidden="true"></i></span>
+							<span class="social-text">instagram</span>
+						</a>
+					</li>
+					<li class="social-item" style="--delay: 500ms; --c: var(--peach)">
+						<a href="https://leetcode.com/jasleenkdev/" target="_blank" rel="noopener noreferrer">
+							<span class="social-icon"><i class="fa-solid fa-code" aria-hidden="true"></i></span>
+							<span class="social-text">leetcode</span>
+						</a>
+					</li>
+				</ul>
+			</section>
 
 			<!-- =============================================================
 			     PROJECTS — three cards
@@ -299,52 +251,100 @@
 					<button class="route-zone route-zone--east" type="button" data-target="0" data-hint="patiala → chandigarh" aria-label="Fly the plane from Patiala to Chandigarh"></button>
 				</div>
 			</section>
+		</div>
 
-			<!-- =============================================================
-			     LINKS — each item fades in upward (animate.css fadeInUp)
-			     Swap the hrefs; --delay staggers the entrance.
-			     ============================================================= -->
-			<section class="links" aria-labelledby="links-title">
-				<h2 class="section-title" id="links-title">links</h2>
-				<ul class="social">
-					<li class="social-item" style="--delay: 0ms; --c: var(--blue)">
-						<a href="https://www.linkedin.com/in/jasleenkalra06/" target="_blank" rel="noopener noreferrer">
-							<span class="social-icon"><i class="fa-brands fa-linkedin-in" aria-hidden="true"></i></span>
-							<span class="social-text">linkedin</span>
-						</a>
-					</li>
-					<li class="social-item" style="--delay: 120ms; --c: var(--mint)">
-						<a href="https://github.com/jasleenkdev" target="_blank" rel="noopener noreferrer">
-							<span class="social-icon"><i class="fa-brands fa-github" aria-hidden="true"></i></span>
-							<span class="social-text">github</span>
-						</a>
-					</li>
-					<li class="social-item" style="--delay: 240ms; --c: var(--yellow)">
-						<a href="https://vsco.co/thebeauty0f/gallery" target="_blank" rel="noopener noreferrer">
-							<span class="social-icon"><i class="fa-solid fa-camera-retro" aria-hidden="true"></i></span>
-							<span class="social-text">vsco</span>
-						</a>
-					</li>
-					<li class="social-item" style="--delay: 360ms; --c: var(--pink)">
-						<!-- EDIT ME: your Instagram handle -->
-						<a href="https://www.instagram.com/goluubombshell/" target="_blank" rel="noopener noreferrer">
-							<span class="social-icon"><i class="fa-brands fa-instagram" aria-hidden="true"></i></span>
-							<span class="social-text">instagram</span>
-						</a>
-					</li>
-					<li class="social-item" style="--delay: 500ms; --c: var(--peach)">
-						<a href="https://leetcode.com/jasleenkdev/" target="_blank" rel="noopener noreferrer">
-							<span class="social-icon"><i class="fa-solid fa-code" aria-hidden="true"></i></span>
-							<span class="social-text">leetcode</span>
-						</a>
-					</li>
+		<!-- =================================================================
+		     SHUFFLE ZONE — text blocks and photos mixed together
+		     Click / tap any empty paper and every block
+		     marked data-shuffle (plus the doodles) glides to a new spot inside
+		     it. Remove data-shuffle from a block to pin it in place.
+
+		     Home layout on wide screens: every block is pinned to a 12-column
+		     grid with
+		         style="--place: ROW / COLUMN / span ROWS / span COLUMNS"
+		     Rows are ~30px tall and grow if the content needs more room, so
+		     longer text pushes things down instead of overlapping.
+		     On phones/tablets the blocks flow in the order written below
+		     (photos pair up side by side, so keep them in twos).
+
+		     Photos: swap src / alt and the hover caption. Each gets a random
+		     tilt; to fix one, add --rot (e.g. --rot: -4deg) to its style.
+		     Placeholder photos come from picsum.photos.
+		     ================================================================= -->
+		<section class="collage" data-zone="shuffle" aria-label="About me and photos" data-bg>
+
+			<!-- NOW BOX — what you're up to right now -->
+			<section class="now-box" data-shuffle aria-labelledby="now-title" style="--place: 1 / 1 / span 6 / span 5">
+				<h2 class="now-title" id="now-title">now: <span class="now-dot" aria-hidden="true"></span></h2>
+				<ul class="now-list">
+					<!-- EDIT ME -->
+					<li><b>building</b> my way through agents, LLMs, and whatever breaks next</li>
+					<li><b>trying</b> to run 5k sub 30</li>
+					<li><b>listening to</b> daft punk, tame imphala, beach house, sufjan stevens, moby</li>
 				</ul>
 			</section>
 
-			<footer class="footer">
-				<p>made with pens, paper &amp; vanilla js · psst — click (or tap) the empty paper around the photos</p>
-			</footer>
-		</div>
+			<figure class="polaroid" data-shuffle tabindex="0" style="--place: 2 / 6 / span 14 / span 3">
+				<img src="me.png" alt="Portrait of Jasleen" width="480" height="600">
+				<div class="polaroid-caption">that's me! <!-- EDIT ME --></div>
+			</figure>
+
+			<figure class="polaroid" data-shuffle tabindex="0" style="--place: 8 / 1 / span 14 / span 3">
+				<!-- EDIT ME: photo + caption -->
+				<img src="images/yosemite.jpg" alt="Yosemite valley view" width="480" height="600" loading="lazy">
+				<div class="polaroid-caption">Kyoto, Japan</div>
+			</figure>
+			
+			<!-- BIO BLURB — colour variants: callout--yellow / pink / mint / blue / peach / lilac -->
+			<article class="callout callout--yellow" data-shuffle style="--place: 4 / 9 / span 7 / span 4; --tilt: 1deg">
+				<h3 class="callout-label">about me</h3>
+				<p>CSE student at Thapar Institute of Engineering &amp; Technology, exploring SDE and AI/ML roles. Open to internship / full-time opportunities in India. <!-- EDIT ME --></p>
+			</article>
+			
+			<figure class="polaroid polaroid--small" data-shuffle tabindex="0" style="--place: 9 / 4 / span 8 / span 2">
+				<!-- EDIT ME: photo + caption -->
+				<img src="images/photo2.jpg" alt="Photo" width="400" height="400" loading="lazy">
+				<div class="polaroid-caption">Dharamshala, India</div>
+			</figure>
+			
+			<figure class="polaroid polaroid--small" data-shuffle tabindex="0" style="--place: 12 / 10 / span 8 / span 2">
+				<!-- EDIT ME: photo + caption -->
+				<img src="images/photo4.jpg" alt="Photo" width="400" height="400" loading="lazy">
+				<div class="polaroid-caption">Mount Fuji, Japan</div>
+			</figure>
+
+			<article class="callout callout--mint" data-shuffle style="--place: 17 / 4 / span 7 / span 5; --tilt: -0.8deg">
+				<h3 class="callout-label">off the clock</h3>
+				<p>
+					Running<br>
+					Lifting<br>
+					Dreaming of directing films in Japan
+				</p>
+			</article>
+
+			<figure class="polaroid polaroid--small" data-shuffle tabindex="0" style="--place: 23 / 1 / span 10 / span 3">
+				<!-- EDIT ME: photo + caption -->
+				<img src="images/photo3.jpg" alt="Placeholder photo" width="400" height="400" loading="lazy">
+				<div class="polaroid-caption">Bir, India</div>
+			</figure>
+
+			<figure class="polaroid polaroid--small" data-shuffle tabindex="0" style="--place: 21 / 10 / span 11 / span 3">
+				<!-- EDIT ME: photo + caption -->
+				<img src="images/photo1.jpg" alt="Placeholder photo" width="400" height="400" loading="lazy">
+				<div class="polaroid-caption">Google, Hyderabad</div>
+			</figure>
+
+			<!-- QUOTE / LINK BOX — a boxed phrase that links somewhere -->
+			<a class="quote-box taped" data-shuffle href="https://in.pinterest.com/pin/19281104652761010/" target="_blank" rel="noopener noreferrer" style="--place: 25 / 5 / span 7 / span 5">
+				<!-- EDIT ME: quote + link -->
+				<span class="quote-text">“  फ़ितूर और जुनून”</span>
+				<span class="quote-meta">→ quote to live by ↗</span>
+			</a>
+		</section>
+
+		<footer class="footer">
+			<p>made with pens, paper &amp; vanilla js · psst — click (or tap) the empty paper around the photos</p>
+		</footer>
 	</main>
 
 </body>
