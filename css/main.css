@@ -1,0 +1,123 @@
+@import url(animate.css);
+
+/* @import url('https://fonts.googleapis.com/css?family=Lato|Poppins'); */
+
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:wght@600&family=Fredoka+One&family=Lato&family=Poppins:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@500&display=swap');
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,300,600");
+@import url('https://fonts.googleapis.com/css2?family=Fondamento&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fondamento&family=Poppins:wght@500&display=swap');
+
+/* @import url('background.css'); */
+
+html,
+body {
+	height: 100%;
+	background: transparent;
+}
+
+h1.title {
+	font-family: 'Poppins';
+	font-weight: 700
+}
+
+.title {
+	font-family: 'Poppins';
+	font-weight: 500;
+}
+
+.subtitle {
+	font-family: 'Crimson Text';
+}
+
+* {
+	font-family: 'Lato';
+	background: transparent;
+}
+
+.profpic-common {
+	-webkit-animation-duration: 1s;
+	animation-duration: 1s;
+	-webkit-animation-direction: alternate;
+	animation-direction: alternate;
+	-webkit-animation-iteration-count: infinite;
+	animation-iteration-count: infinite;
+	-webkit-animation-timing-function: linear;
+	animation-timing-function: linear;
+
+	/* other properties */
+	border-radius: 5px;
+	left: 0;
+	right: 0;
+}
+
+.profpic {
+	/* animation properties */
+	-webkit-animation-name: profpic;
+	animation-name: profpic;
+}
+
+.profpic-reverse {
+	-webkit-animation-name: profpic-reverse;
+	animation-name: profpic-reverse;
+}
+
+@-webkit-keyframes profpic {
+	0% {
+		top: 5px;
+	}
+
+	50% {
+		left: 5px;
+	}
+
+	100% {
+		top: 0px;
+		left: 0px;
+	}
+}
+
+@keyframes profpic {
+	0% {
+		top: 5px;
+	}
+
+	50% {
+		left: 5px;
+	}
+
+	100% {
+		top: 0px;
+		left: 0px;
+	}
+}
+
+@-webkit-keyframes profpic-reverse {
+	0% {
+		top: -5px;
+	}
+
+	50% {
+		left: -5px;
+	}
+
+	100% {
+		top: 0px;
+		left: 0px;
+	}
+}
+
+@keyframes profpic-reverse {
+	0% {
+		top: -5px;
+	}
+
+	50% {
+		left: -5px;
+	}
+
+	100% {
+		top: 0px;
+		left: 0px;
+	}
+}
