@@ -1,0 +1,874 @@
+/* =========================================================================
+   scrapbook.css — hand-drawn moodboard on graph paper
+   -------------------------------------------------------------------------
+   1. Tokens (colours, fonts)       7. Projects
+   2. Base + graph paper            8. Chandigarh ⇄ Patiala route
+   3. Doodle layer                  9. Links + footer
+   4. Layout, zones, collage grid  10. Line-draw animation
+   5. Header, now box, callouts,   11. Responsive + reduced motion
+      quote box                    12. Custom pink cursor
+   6. Photos / polaroids
+   ========================================================================= */
+
+
+/* 1. TOKENS ---------------------------------------------------------------- */
+:root {
+	--paper: #fbf9f3;
+	--card: #fffdf8;
+	--grid-minor: rgba(84, 132, 196, 0.13);
+	--grid-major: rgba(84, 132, 196, 0.26);
+
+	--ink: #27251f;
+	--ink-soft: #5d584d;
+	--pen-blue: #3957c8;
+	--pink-ink: #e46a91; /* name underline, pink doodles, cursor */
+
+	/* highlighter / sticky-note colours */
+	--yellow: #ffe57a;
+	--pink: #ffc4d3;
+	--mint: #c3ebd3;
+	--blue: #c3dbff;
+	--peach: #ffd3b3;
+	--lilac: #ddd0ff;
+	--tape: rgba(246, 214, 120, 0.72);
+
+	--hand: 'Caveat', 'Segoe Print', 'Comic Sans MS', cursive;
+	--body: 'Kalam', 'Segoe Print', 'Comic Sans MS', cursive;
+
+	/* the classic wobbly "hand-drawn" border radius */
+	--sketchy: 255px 14px 225px 14px / 14px 225px 14px 255px;
+}
+
+
+/* 2. BASE + GRAPH PAPER ---------------------------------------------------- */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body {
+	position: relative;
+	min-height: 100vh;
+	margin: 0;
+	overflow-x: hidden;
+	color: var(--ink);
+	font-family: var(--body);
+	font-size: 17px;
+	line-height: 1.5;
+	background-color: var(--paper);
+	/* major grid every 100px, minor grid every 20px */
+	background-image:
+		linear-gradient(var(--grid-major) 1px, transparent 1px),
+		linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+		linear-gradient(var(--grid-minor) 1px, transparent 1px),
+		linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px);
+	background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+}
+
+img {
+	max-width: 100%;
+}
+
+a {
+	color: inherit;
+}
+
+:focus-visible {
+	outline: 2px dashed var(--pen-blue);
+	outline-offset: 4px;
+}
+
+.section-title {
+	display: inline-block;
+	margin: 0;
+	font-family: var(--hand);
+	font-size: 2.6rem;
+	font-weight: 700;
+	line-height: 1.1;
+	/* highlighter swipe behind the lower half of the text */
+	background: linear-gradient(transparent 55%, var(--yellow) 55%, var(--yellow) 88%, transparent 88%);
+	padding: 0 0.3rem;
+}
+
+/* strip of washi tape across the top edge — add class="taped" */
+.taped::before {
+	content: '';
+	position: absolute;
+	top: -14px;
+	left: 50%;
+	width: 96px;
+	height: 28px;
+	background: var(--tape);
+	transform: translateX(-50%) rotate(-4deg);
+	clip-path: polygon(3% 0, 97% 6%, 100% 50%, 96% 100%, 2% 94%, 0 50%);
+}
+
+
+/* 3. DOODLE LAYER ---------------------------------------------------------- */
+.doodle-layer {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	overflow: hidden;
+	pointer-events: none; /* clicks fall through to the paper */
+}
+
+.doodle {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: var(--size, 48px);
+	height: var(--size, 48px);
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2.4;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	opacity: 0.8;
+	/* JS sets transform: translate(x, y) rotate(r); this makes each shuffle glide (with a tiny overshoot) */
+	transition:
+		transform 1.1s cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay, 0ms),
+		opacity 0.5s ease;
+}
+
+/* no transition on the very first placement; hidden until placed */
+.doodle-layer.is-placing .doodle {
+	transition: none;
+}
+
+.doodle-layer:not(.is-ready) .doodle {
+	opacity: 0;
+}
+
+.ink-pink   { color: var(--pink-ink); }
+.ink-blue   { color: #4a6fe3; }
+.ink-yellow { color: #dea400; }
+.ink-green  { color: #3c9b6b; }
+.ink-orange { color: #ec7a36; }
+.ink-purple { color: #8a63d2; }
+
+
+/* 4. LAYOUT, ZONES, COLLAGE GRID ------------------------------------------- */
+.board {
+	position: relative;
+	z-index: 1; /* above the doodles */
+	max-width: 1120px;
+	margin: 0 auto;
+	padding: 48px 24px 40px;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-areas: "head" "collage" "projects" "route" "links" "foot";
+	gap: 64px;
+}
+
+/* the static lower zone is only a wrapper for the code — its sections stay in the board grid */
+.static-zone {
+	display: contents;
+}
+
+/* UPPER SHUFFLE ZONE
+   Text and photos share one 12-column grid. Each child sets its home spot
+   with --place (row / column / span rows / span columns) in the HTML.
+   Rows are at least 30px and stretch to fit content, so nothing overlaps.
+   position: relative makes this the reference box JS measures blocks against. */
+.collage {
+	grid-area: collage;
+	position: relative;
+	display: grid;
+	grid-template-columns: repeat(12, minmax(0, 1fr));
+	grid-auto-rows: minmax(30px, auto);
+	column-gap: 24px;
+	align-items: start;
+}
+
+.collage > * {
+	grid-area: var(--place);
+}
+
+/* Shuffled blocks are moved with the `translate` property (set by JS), which
+   stacks with their own rotate/scale `transform`, so hover effects keep working.
+   This glide matches the doodles' timing; each block's transition list includes it. */
+.collage > [data-shuffle] {
+	--shuffle-glide: translate 1.1s cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay, 0ms);
+}
+
+
+/* 5a. HEADER --------------------------------------------------------------- */
+.masthead {
+	grid-area: head;
+}
+
+.masthead-date {
+	display: inline-block;
+	min-height: 1.3em; /* keeps the space while JS writes the date */
+	margin: 0;
+	font-family: var(--hand);
+	font-size: 1.6rem;
+	color: var(--pen-blue);
+	transform: rotate(-2deg);
+}
+
+.name-wrap {
+	display: inline-block;
+	max-width: 100%;
+}
+
+.masthead-name {
+	margin: 0.1rem 0 0;
+	font-family: var(--hand);
+	font-size: clamp(3.4rem, 11vw, 7.5rem);
+	font-weight: 700;
+	line-height: 0.95;
+}
+
+/* underline that runs under the name, then sweeps up into a dot */
+.name-underline {
+	display: block;
+	width: 100%;
+	height: auto;
+	margin-top: -5%; /* a % of the name's width, so it tucks under the letters at every size */
+	overflow: visible;
+	fill: none;
+	stroke: var(--pink-ink);
+	stroke-width: 5;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.name-underline .underline-dot {
+	fill: var(--pink-ink);
+	stroke: none;
+	transform-box: fill-box;
+	transform-origin: center;
+	/* pops in once the line has finished drawing */
+	transition: scale 0.35s cubic-bezier(0.34, 1.6, 0.64, 1) 1.15s, opacity 0.15s ease 1.15s;
+}
+
+.name-underline.draw-ready .underline-dot {
+	opacity: 0;
+	scale: 0;
+}
+
+.name-underline.draw-ready.is-drawn .underline-dot {
+	opacity: 1;
+	scale: 1;
+}
+
+.masthead-tagline {
+	margin: 0.5rem 0 0;
+	font-size: 1.15rem;
+	color: var(--ink-soft);
+}
+
+
+/* 5b. NOW BOX -------------------------------------------------------------- */
+.now-box {
+	position: relative;
+	padding: 1rem 1.5rem 1.2rem;
+	background: var(--card);
+	border: 2.5px solid var(--ink);
+	border-radius: 26px 38px 22px 44px / 40px 24px 42px 22px;
+	transform: rotate(-1deg);
+	transition: var(--shuffle-glide, translate 0s);
+}
+
+/* a second, looser pen stroke around the box */
+.now-box::after {
+	content: '';
+	position: absolute;
+	inset: -7px -4px -3px -8px;
+	border: 1.5px solid var(--ink);
+	border-radius: 36px 22px 44px 26px / 24px 42px 22px 40px;
+	opacity: 0.45;
+	transform: rotate(1.3deg);
+	pointer-events: none;
+}
+
+.now-title {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	margin: 0 0 0.2rem;
+	font-family: var(--hand);
+	font-size: 2.8rem;
+	line-height: 1;
+}
+
+.now-dot {
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background: #3c9b6b;
+	box-shadow: 0 0 0 0 rgba(60, 155, 107, 0.5);
+	animation: now-pulse 2s ease-out infinite;
+}
+
+@keyframes now-pulse {
+	70%  { box-shadow: 0 0 0 10px rgba(60, 155, 107, 0); }
+	100% { box-shadow: 0 0 0 0 rgba(60, 155, 107, 0); }
+}
+
+.now-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.now-list li {
+	position: relative;
+	padding-left: 1.6rem;
+}
+
+.now-list li + li {
+	margin-top: 0.2rem;
+}
+
+.now-list li::before {
+	content: '→';
+	position: absolute;
+	left: 0;
+	color: var(--pen-blue);
+}
+
+
+/* 5c. CALLOUTS (bio blurbs + project cards) -------------------------------- */
+.callout {
+	--accent: var(--yellow);
+	position: relative;
+	padding: 1.6rem 1.3rem 1rem;
+	background: var(--card);
+	border: 2px solid var(--ink);
+	border-radius: var(--sketchy);
+	box-shadow: 5px 6px 0 var(--accent);
+	transform: rotate(var(--tilt, -0.6deg));
+	transition: var(--shuffle-glide, translate 0s);
+}
+
+.callout--yellow { --accent: var(--yellow); }
+.callout--pink   { --accent: var(--pink); }
+.callout--mint   { --accent: var(--mint); }
+.callout--blue   { --accent: var(--blue); }
+.callout--peach  { --accent: var(--peach); }
+.callout--lilac  { --accent: var(--lilac); }
+
+.callout-label {
+	position: absolute;
+	top: -1.25rem;
+	left: 1rem;
+	margin: 0;
+	padding: 0 0.65rem;
+	font-family: var(--hand);
+	font-size: 1.75rem;
+	font-weight: 700;
+	line-height: 1.3;
+	background: var(--accent);
+	border: 2px solid var(--ink);
+	border-radius: 6px 14px 8px 12px;
+	transform: rotate(-2.5deg);
+}
+
+.callout p {
+	margin: 0;
+}
+
+/* project name → demo video */
+.demo-link {
+	text-decoration: none;
+}
+
+.demo-link:hover,
+.demo-link:focus-visible {
+	text-decoration: underline wavy;
+	text-underline-offset: 4px;
+}
+
+
+/* 5d. QUOTE BOX ------------------------------------------------------------ */
+.quote-box {
+	position: relative;
+	display: block;
+	justify-self: center;
+	width: 100%;
+	max-width: 420px;
+	padding: 1.5rem 1.6rem 1.1rem;
+	background: #eaf2ff;
+	border: 2px dashed var(--ink);
+	text-decoration: none;
+	transform: rotate(1.5deg);
+	transition:
+		transform 0.25s ease,
+		box-shadow 0.25s ease,
+		var(--shuffle-glide, translate 0s);
+}
+
+.quote-box:hover,
+.quote-box:focus-visible {
+	transform: rotate(-1deg) scale(1.03);
+	box-shadow: 6px 8px 0 var(--blue);
+}
+
+.quote-text {
+	display: block;
+	font-family: var(--hand);
+	font-size: 2.1rem;
+	line-height: 1.1;
+}
+
+.quote-meta {
+	display: block;
+	margin-top: 0.5rem;
+	font-size: 0.95rem;
+	color: var(--ink-soft);
+}
+
+
+/* 6. PHOTOS / POLAROIDS ---------------------------------------------------- */
+/* fallback tilts if JS is off (JS randomises --rot) */
+.polaroid:nth-of-type(odd)  { --rot: -3deg; }
+.polaroid:nth-of-type(even) { --rot: 4deg; }
+
+.polaroid {
+	position: relative;
+	z-index: 1;
+	margin: 0;
+	padding: 10px 10px 40px;
+	background: #fff;
+	box-shadow:
+		0 1px 3px rgba(0, 0, 0, 0.12),
+		0 10px 20px -10px rgba(0, 0, 0, 0.3);
+	transform: rotate(var(--rot, 0deg)) scale(1);
+	cursor: zoom-in;
+	/* z-index drops only after the shrink finishes, so the photo doesn't slip under its neighbours mid-animation */
+	transition:
+		transform 0.35s cubic-bezier(0.2, 0.8, 0.3, 1.15),
+		box-shadow 0.35s ease,
+		z-index 0s linear 0.35s,
+		var(--shuffle-glide, translate 0s);
+}
+
+.polaroid img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 4 / 5;
+	object-fit: cover;
+	background: #ebe6da;
+}
+
+.polaroid--small img {
+	aspect-ratio: 1 / 1;
+}
+
+/* hover / focus state — toggled by JS on mouseenter / mouseleave */
+.polaroid.is-lifted {
+	z-index: 30;
+	transform: rotate(0deg) scale(1.15);
+	box-shadow:
+		0 2px 4px rgba(0, 0, 0, 0.1),
+		0 24px 44px -12px rgba(0, 0, 0, 0.45);
+	transition:
+		transform 0.35s cubic-bezier(0.2, 0.8, 0.3, 1.15),
+		box-shadow 0.35s ease,
+		z-index 0s,
+		var(--shuffle-glide, translate 0s);
+}
+
+.polaroid:focus-visible {
+	outline-offset: 8px;
+}
+
+.polaroid-caption {
+	position: absolute;
+	left: 50%;
+	bottom: -14px;
+	width: max-content;
+	max-width: 115%;
+	padding: 3px 12px;
+	font-family: var(--hand);
+	font-size: 1.3rem;
+	line-height: 1.15;
+	text-align: center;
+	background: var(--yellow);
+	box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+	opacity: 0;
+	transform: translate(-50%, 8px) rotate(-2deg);
+	transition: opacity 0.25s ease, transform 0.25s ease;
+	pointer-events: none;
+}
+
+.polaroid.is-lifted .polaroid-caption {
+	opacity: 1;
+	transform: translate(-50%, 0) rotate(-2deg);
+}
+
+
+/* 7. PROJECTS -------------------------------------------------------------- */
+.projects {
+	grid-area: projects;
+}
+
+.project-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	align-items: start;
+	gap: 56px 32px;
+	margin-top: 2.2rem;
+}
+
+/* stagger the cards so they don't sit in a neat row */
+.project-card:nth-child(2) { margin-top: 40px; }
+.project-card:nth-child(3) { margin-top: 12px; }
+
+.project-card p {
+	margin-bottom: 0.9rem;
+}
+
+.project-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.6rem;
+}
+
+.project-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45rem;
+	padding: 0.05rem 0.85rem;
+	font-family: var(--hand);
+	font-size: 1.4rem;
+	font-weight: 700;
+	text-decoration: none;
+	background: var(--card);
+	border: 2px solid var(--ink);
+	border-radius: 14px 6px 12px 8px / 8px 12px 6px 14px;
+	transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.project-link i {
+	font-size: 0.95rem;
+}
+
+.project-link:hover,
+.project-link:focus-visible {
+	background: var(--accent);
+	transform: rotate(-2deg) translateY(-2px);
+}
+
+
+/* 8. CHANDIGARH ⇄ PATIALA ROUTE -------------------------------------------- */
+.route {
+	grid-area: route;
+	padding: 1.2rem clamp(0.75rem, 3vw, 2rem) 1rem;
+	background: var(--card);
+	border: 2px solid var(--ink);
+	border-radius: var(--sketchy);
+}
+
+.route-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0.25rem 1rem;
+}
+
+.route-hint {
+	margin: 0;
+	font-size: 0.95rem;
+	color: var(--ink-soft);
+}
+
+.route-stage {
+	position: relative;
+	width: 100%;
+	aspect-ratio: 1000 / 330; /* matches the SVG viewBox so the hover zones line up */
+}
+
+.route-svg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+.landmark path {
+	fill: none;
+	stroke: var(--ink);
+	stroke-width: 2.6;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.city-label {
+	font-family: var(--hand);
+	font-size: 38px;
+	font-weight: 700;
+	fill: var(--ink);
+}
+
+.flight-path {
+	fill: none;
+	stroke: var(--pen-blue);
+	stroke-width: 2.2;
+	stroke-linecap: round;
+	stroke-dasharray: 3 11;
+	opacity: 0.35;
+	transition: opacity 0.3s ease;
+}
+
+.route-stage.is-flying .flight-path {
+	opacity: 0.85;
+}
+
+#plane {
+	transition: opacity 0.2s ease;
+}
+
+#plane.is-hidden {
+	opacity: 0;
+}
+
+.plane-body {
+	fill: #fff;
+	stroke: var(--ink);
+	stroke-width: 2.4;
+	stroke-linejoin: round;
+	stroke-linecap: round;
+}
+
+/* invisible hover zones covering the sky between the two cities
+   (the flight path runs from x≈21% to x≈81% of the stage) */
+.route-zone {
+	position: absolute;
+	top: 0;
+	height: 74%;
+	width: 30%;
+	padding: 0;
+	font: inherit;
+	background: transparent;
+	border: 0;
+	cursor: crosshair;
+}
+
+.route-zone--west { left: 21%; }
+.route-zone--east { left: 51%; }
+
+.route-zone::after {
+	content: attr(data-hint);
+	position: absolute;
+	left: 50%;
+	bottom: 0;
+	font-family: var(--hand);
+	font-size: clamp(1rem, 2.4vw, 1.5rem);
+	color: var(--pen-blue);
+	white-space: nowrap;
+	opacity: 0;
+	transform: translate(-50%, 4px);
+	transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.route-zone:hover::after,
+.route-zone:focus-visible::after {
+	opacity: 1;
+	transform: translate(-50%, 0);
+}
+
+.route-zone:focus-visible {
+	outline-offset: -4px;
+}
+
+
+/* 9. LINKS + FOOTER -------------------------------------------------------- */
+.links {
+	grid-area: links;
+}
+
+.social {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 18px 36px;
+	margin: 1rem 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* start hidden (JS adds animate.css's "animated fadeInUp" when scrolled into view) */
+.js .social-item {
+	opacity: 0;
+}
+
+.social-item.animated {
+	animation-delay: var(--delay, 0ms);
+}
+
+.social a {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.7rem;
+	font-family: var(--hand);
+	font-size: 1.9rem;
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.social-icon {
+	display: grid;
+	place-items: center;
+	width: 54px;
+	height: 54px;
+	font-size: 1.35rem;
+	background: var(--card);
+	border: 2px solid var(--ink);
+	border-radius: 50% 44% 56% 47% / 47% 56% 44% 53%;
+	transition: transform 0.25s ease, background-color 0.25s ease;
+}
+
+.social a:hover .social-icon,
+.social a:focus-visible .social-icon {
+	background: var(--c, var(--yellow));
+	transform: rotate(-10deg) scale(1.08);
+}
+
+.social a:hover .social-text,
+.social a:focus-visible .social-text {
+	text-decoration: underline wavy;
+	text-underline-offset: 5px;
+}
+
+.footer {
+	grid-area: foot;
+	text-align: center;
+	font-size: 0.95rem;
+	color: var(--ink-soft);
+}
+
+.footer p {
+	margin: 0;
+}
+
+
+/* 10. LINE-DRAW ANIMATION --------------------------------------------------
+   JS measures every stroke inside [data-draw], stores its length in --len
+   and its order in --i, then adds .draw-ready. When the drawing scrolls
+   into view JS adds .is-drawn, and the dash offset animates to 0.
+   ------------------------------------------------------------------------- */
+.draw-ready :is(path, line, polyline, polygon, rect, circle, ellipse) {
+	stroke-dasharray: var(--len) calc(var(--len) + 10px);
+	stroke-dashoffset: calc(var(--len) + 5px);
+	transition: stroke-dashoffset 1.3s cubic-bezier(0.55, 0.1, 0.35, 1) calc(var(--i, 0) * 110ms);
+}
+
+.draw-ready.is-drawn :is(path, line, polyline, polygon, rect, circle, ellipse) {
+	stroke-dashoffset: 0;
+}
+
+.draw-ready .city-label {
+	opacity: 0;
+	transition: opacity 0.8s ease 1.2s;
+}
+
+.draw-ready.is-drawn .city-label {
+	opacity: 1;
+}
+
+
+/* 11. RESPONSIVE + REDUCED MOTION ----------------------------------------- */
+
+/* Tablets and phones: the collage's home layout becomes a two-column flow in
+   HTML order — text blocks take the full width, photos pair up side by side. */
+@media (max-width: 860px) {
+	.board {
+		gap: 56px;
+	}
+
+	.collage {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-auto-rows: auto;
+		gap: 44px 20px;
+	}
+
+	.collage > * {
+		grid-area: auto;
+	}
+
+	.collage > :not(figure) {
+		grid-column: 1 / -1;
+	}
+
+	.collage > figure:nth-of-type(even) {
+		margin-top: 36px;
+	}
+
+	.quote-box {
+		justify-self: start;
+	}
+
+	.project-grid {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 48px;
+	}
+
+	.project-card:nth-child(n) {
+		margin-top: 0;
+	}
+}
+
+@media (max-width: 560px) {
+	.board {
+		padding: 32px 16px 32px;
+	}
+
+	.collage {
+		gap: 36px 16px;
+	}
+
+	.polaroid {
+		padding: 7px 7px 28px;
+	}
+
+	.city-label {
+		font-size: 50px; /* larger in SVG units so it stays readable when the drawing shrinks */
+	}
+
+	.social {
+		gap: 14px 24px;
+	}
+
+	.social a {
+		font-size: 1.6rem;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-delay: 0ms !important;
+		transition-duration: 0.01ms !important;
+		transition-delay: 0ms !important;
+	}
+}
+
+
+/* 12. CUSTOM PINK CURSOR ---------------------------------------------------
+   Small SVG cursors as data URIs, filled with the same pink as --pink-ink
+   (CSS variables can't reach inside a data URI, so the colour is written as
+   %23e46a91 — "%23" is "#"). Each has a normal system cursor as fallback.
+   Only applied to devices with a real mouse/trackpad; touch screens skip it.
+   ------------------------------------------------------------------------- */
+@media (hover: hover) and (pointer: fine) {
+	/* everywhere: pink arrow (hotspot at its tip) */
+	html {
+		cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M4 2.5V19.5l4.6-4.2 3 6.4 2.9-1.3-3-6.3h6.3z' fill='%23e46a91' stroke='%23fff' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 4 3, auto;
+	}
+
+	/* anything clickable: pink dot with a soft halo (hotspot in the centre) */
+	a,
+	button,
+	.polaroid,
+	.route-zone {
+		cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='12' fill='%23e46a91' fill-opacity='.22'/%3E%3Ccircle cx='14' cy='14' r='6' fill='%23e46a91' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E") 14 14, pointer;
+	}
+}
