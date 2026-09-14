@@ -81,23 +81,25 @@
 		<svg class="doodle ink-yellow" style="--size: 54px" viewBox="0 0 48 48"><path d="M30 8 L33 15 L40 16 L35 21 L36 28 L30 25 L24 28 L25 21 L20 16 L27 15 Z M18 26 L6 38 M22 32 L12 42 M14 22 L6 28"/></svg>
 	</div>
 
-	<!-- data-bg marks "empty paper" (the page gutters and the gaps inside the collage).
-	     Clicking/tapping it reshuffles — but only level with the shuffle zone below. -->
+	<!-- data-bg marks "empty paper": the page gutters, the blank space in the header and
+	     the gaps around the collage. Clicking/tapping it reshuffles — anywhere above the
+	     static lower zone (projects and below). -->
 	<main class="board" data-bg>
 
 		<!-- =================================================================
-		     HEADER — date + name (static: never moves)
+		     HEADER — date + name (never moves; its blank paper still reshuffles)
 		     The date line ("september 14, 2026 · page 257") is written by JS
 		     from the visitor's own clock; "page" is the day of the year.
 		     ================================================================= -->
-		<header class="masthead" data-zone="static">
+		<header class="masthead" data-zone="static" data-bg>
 			<p class="masthead-date"><time data-today></time></p>
 			<div class="name-wrap">
 				<h1 class="masthead-name">Jasleen Kalra</h1>
-				<!-- hand-drawn underline that sweeps up into a dot (draws itself in on load) -->
-				<svg class="name-underline" viewBox="0 0 420 48" aria-hidden="true" data-draw>
-					<path d="M6 38 C 70 31, 140 44, 220 38 C 290 33, 350 40, 382 30 C 398 25, 406 16, 410 7"/>
-					<circle class="underline-dot" cx="410" cy="7" r="6"/>
+				<!-- hand-drawn underline that runs past the name and sweeps up into an arrow tip
+				     (draws itself in on load). x 0–420 sits under the name; 420–496 is the overhang. -->
+				<svg class="name-underline" viewBox="0 0 496 48" aria-hidden="true" data-draw data-bg>
+					<path d="M6 38 C 70 31, 140 44, 220 38 C 300 32, 370 42, 420 34 C 448 29, 468 20, 480 8"/>
+					<path class="underline-arrow" d="M462 13 Q 471 9.5 480 8 Q 478 16 477 25"/>
 				</svg>
 			</div>
 			<p class="masthead-tagline">student · builder · collector of small good things <!-- EDIT ME --></p>
@@ -328,6 +330,12 @@
 						<a href="https://www.instagram.com/goluubombshell/" target="_blank" rel="noopener noreferrer">
 							<span class="social-icon"><i class="fa-brands fa-instagram" aria-hidden="true"></i></span>
 							<span class="social-text">instagram</span>
+						</a>
+					</li>
+					<li class="social-item" style="--delay: 500ms; --c: var(--peach)">
+						<a href="https://leetcode.com/jasleenkdev/" target="_blank" rel="noopener noreferrer">
+							<span class="social-icon"><i class="fa-solid fa-code" aria-hidden="true"></i></span>
+							<span class="social-text">leetcode</span>
 						</a>
 					</li>
 				</ul>
