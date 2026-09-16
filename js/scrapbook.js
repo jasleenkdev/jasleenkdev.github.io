@@ -122,14 +122,27 @@
 
 		/*
 		 * The layer covers the entire page.
+		 *
+		 * `inset: 0` stretches it to <body>'s box, so the layer is
+		 * always exactly as big as the content currently measures and
+		 * JS never writes a pixel height here.
+		 *
+		 * That matters. The layer is an absolutely positioned child of
+		 * <body>, so it counts towards document.scrollHeight but NOT
+		 * towards <body>'s own auto height. A hard-coded height would
+		 * therefore be read straight back as "the page height" the next
+		 * time anything measured the document, and the page could only
+		 * ever grow — which is what left blank scroll space under the
+		 * footer. See getPageSize() below.
+		 *
+		 * overflow: hidden stops a doodle near an edge from adding
+		 * scrollable area of its own.
 		 */
 		layer.style.position = 'absolute';
-		layer.style.left = '0';
-		layer.style.top = '0';
-		layer.style.width = '100vw';
+		layer.style.inset = '0';
 		layer.style.pointerEvents = 'none';
 		layer.style.zIndex = '0';
-		layer.style.overflow = 'visible';
+		layer.style.overflow = 'hidden';
 
 
 		/*
@@ -146,48 +159,50 @@
 
 
 		/*
-		 * Measure each doodle once.
+		 * How much room one doodle needs, measured fresh on every
+		 * scatter instead of once at startup — at startup the web
+		 * fonts and images are still arriving, and a size captured
+		 * then can be wrong for the rest of the page's life.
+		 *
+		 * getComputedStyle reports the LAYOUT size, which ignores the
+		 * transform we set below. getBoundingClientRect() would hand
+		 * back the ROTATED box instead, so every shuffle would think
+		 * the doodle had grown a little and the usable range would
+		 * creep inwards.
 		 *
 		 * The multiplier gives enough room for rotation so
 		 * doodles don't get pushed outside the page edges.
 		 */
-		const sizes = doodles.map((doodle) => {
-			const rect =
-				doodle.getBoundingClientRect();
+		function doodleSize(doodle) {
+			const style =
+				getComputedStyle(doodle);
 
 			return Math.max(
-				rect.width,
-				rect.height
+				parseFloat(style.width) || 0,
+				parseFloat(style.height) || 0
 			) * 1.37;
-		});
+		}
 
 
 		/* -----------------------------------------------------
 		   PAGE SIZE
 		   ----------------------------------------------------- */
 
+		/*
+		 * The box a scatter is allowed to use.
+		 *
+		 * This reads the layer itself rather than
+		 * document.scrollHeight, so the number can never include the
+		 * layer's own size: <body> stretches the layer, the layer
+		 * never stretches <body>. Measuring here also means the
+		 * numbers are re-read on every scatter, so a late web font or
+		 * image that reflows the page is picked up automatically.
+		 */
 		function getPageSize() {
 			return {
-				width: Math.max(
-					document.documentElement.clientWidth,
-					window.innerWidth
-				),
-
-				height: Math.max(
-					document.documentElement.scrollHeight,
-					document.body.scrollHeight,
-					window.innerHeight
-				)
+				width: layer.clientWidth,
+				height: layer.clientHeight
 			};
-		}
-
-
-		function updateLayerSize() {
-			const { height } =
-				getPageSize();
-
-			layer.style.height =
-				`${height}px`;
 		}
 
 
@@ -195,17 +210,32 @@
 		   SCATTER DOODLES
 		   ----------------------------------------------------- */
 
-		function scatter() {
-			updateLayerSize();
+		/*
+		 * The page box the current placement was drawn from, so a
+		 * later reflow can be told apart from a stray event.
+		 */
+		let lastBox = {
+			width: 0,
+			height: 0
+		};
 
+
+		function scatter() {
 			const {
 				width: pageWidth,
 				height: pageHeight
 			} = getPageSize();
 
 
-			doodles.forEach((doodle, i) => {
-				const size = sizes[i];
+			lastBox = {
+				width: pageWidth,
+				height: pageHeight
+			};
+
+
+			doodles.forEach((doodle) => {
+				const size =
+					doodleSize(doodle);
 
 
 				const maxX = Math.max(
@@ -227,6 +257,13 @@
 				/*
 				 * Random position anywhere across
 				 * the ENTIRE page.
+				 *
+				 * Each click draws a brand new value
+				 * from the same fixed range — nothing
+				 * is measured from, or added to, where
+				 * the doodle happens to be sitting
+				 * now, so repeated clicks cannot walk
+				 * the doodles off in one direction.
 				 */
 				const x =
 					rand(
@@ -284,6 +321,97 @@
 				);
 			});
 		});
+
+
+		/* -----------------------------------------------------
+		   RE-MEASURE ONCE THE PAGE HAS SETTLED
+		   ----------------------------------------------------- */
+
+		/*
+		 * This file is `defer`red, so it runs at DOMContentLoaded —
+		 * before the web fonts and the lazy photos have arrived. Those
+		 * reflow the page when they land, which makes every bound
+		 * measured up to that point stale.
+		 *
+		 * So: measure again when the page finishes loading, when the
+		 * fonts swap in, and when a lazy image decodes. Re-scatter only
+		 * if the page box actually changed, otherwise the doodles would
+		 * jump about for no reason while someone is reading.
+		 */
+		let settleTimer;
+
+		const rescatterIfResized = () => {
+
+			clearTimeout(settleTimer);
+
+			settleTimer =
+				setTimeout(() => {
+
+					const {
+						width,
+						height
+					} = getPageSize();
+
+
+					if (
+						Math.abs(
+							width -
+								lastBox.width
+						) < 2 &&
+						Math.abs(
+							height -
+								lastBox.height
+						) < 2
+					) {
+						return;
+					}
+
+
+					scatter();
+
+				}, 100);
+		};
+
+
+		window.addEventListener(
+			'load',
+			rescatterIfResized
+		);
+
+
+		if (document.fonts) {
+			document.fonts.ready.then(
+				rescatterIfResized
+			);
+		}
+
+
+		document
+			.querySelectorAll('img')
+			.forEach((img) => {
+
+				if (img.complete) return;
+
+				img.addEventListener(
+					'load',
+					rescatterIfResized,
+					{ once: true }
+				);
+			});
+
+
+		/*
+		 * Catch-all for anything else that changes the page height
+		 * later on. <body> stretches the layer, so watching <body>
+		 * covers every reflow; the doodles themselves can't trigger
+		 * this, because they are absolutely positioned and clipped.
+		 */
+		if (typeof ResizeObserver === 'function') {
+
+			new ResizeObserver(
+				rescatterIfResized
+			).observe(document.body);
+		}
 
 
 		return scatter;
