@@ -8,6 +8,7 @@
    4. Line-draw animation for [data-draw] SVGs
    5. Chandigarh ⇄ Patiala paper-plane flight
    6. Social links fade-in-up on scroll
+   7. Audio: background music toggle + a click sound on every click
    ========================================================================= */
 
    (() => {
@@ -1945,6 +1946,368 @@
 	}
 
 
+	/* 7. AUDIO -------------------------------------------------------------
+	   Two separate things that share one rule: browsers only let a page make
+	   noise after the visitor has interacted with it.
+
+	   - Background music lives in the hidden #bg-music YouTube embed. It
+	     autoplays muted (which browsers do allow), and the floating button
+	     un-mutes it through the YouTube IFrame Player API.
+	   - The click sound plays on every click anywhere on the page. The very
+	     first click is also what unlocks audio for the session, so it both
+	     pops and gets the muted embed rolling.
+	   ---------------------------------------------------------------------- */
+
+	function initAudio() {
+
+		const frame =
+			document.getElementById(
+				'bg-music'
+			);
+
+		const button =
+			document.getElementById(
+				'music-toggle'
+			);
+
+		const label =
+			document.getElementById(
+				'music-toggle-label'
+			);
+
+
+		/*
+		 * The YT player object, once the API has
+		 * loaded and hooked itself onto the iframe.
+		 * Until then the button is a no-op.
+		 */
+		let player = null;
+
+		let playerReady = false;
+
+		let musicOn = false;
+
+
+		/*
+		 * Set if the visitor clicked (or hit the
+		 * button) before the API finished loading,
+		 * so we can act on it the moment it is ready.
+		 */
+		let wantsPlay = false;
+
+		let wantsMusicOn = false;
+
+
+		/* -----------------------------------------------------
+		   THE FLOATING BUTTON'S LOOK
+		   ----------------------------------------------------- */
+
+		function paintButton() {
+
+			if (!button) {
+				return;
+			}
+
+
+			button.setAttribute(
+				'aria-pressed',
+				musicOn
+					? 'true'
+					: 'false'
+			);
+
+
+			button.setAttribute(
+				'aria-label',
+				musicOn
+					? 'Turn background music off'
+					: 'Turn background music on'
+			);
+
+
+			const icon =
+				button.querySelector('i');
+
+
+			if (icon) {
+
+				icon.className =
+					musicOn
+						? 'fa-solid fa-music'
+						: 'fa-solid fa-volume-xmark';
+			}
+
+
+			if (label) {
+
+				label.textContent =
+					musicOn
+						? 'playing'
+						: 'play';
+			}
+		}
+
+
+		/* -----------------------------------------------------
+		   UNLOCK: first interaction of the session
+		   -----------------------------------------------------
+		   Nudges the muted embed into playing, so that when the
+		   visitor does hit the button there is already a running
+		   video to un-mute. */
+
+		let unlocked = false;
+
+
+		function unlockAudio() {
+
+			if (unlocked) {
+				return;
+			}
+
+
+			unlocked = true;
+
+
+			if (playerReady && player) {
+				player.playVideo();
+			} else {
+				wantsPlay = true;
+			}
+		}
+
+
+		/* -----------------------------------------------------
+		   THE TOGGLE ITSELF
+		   ----------------------------------------------------- */
+
+		function toggleMusic() {
+
+			if (!playerReady || !player) {
+
+				/*
+				 * API still loading — remember the
+				 * intent and apply it on ready.
+				 */
+				wantsMusicOn = !wantsMusicOn;
+
+				wantsPlay = true;
+
+				return;
+			}
+
+
+			musicOn = !musicOn;
+
+
+			if (musicOn) {
+
+				player.unMute();
+
+				player.setVolume(35);
+
+				player.playVideo();
+
+			} else {
+
+				player.mute();
+
+				player.pauseVideo();
+			}
+
+
+			paintButton();
+		}
+
+
+		if (button) {
+
+			button.addEventListener(
+				'click',
+				toggleMusic
+			);
+		}
+
+
+		/* -----------------------------------------------------
+		   CLICK SOUND
+		   -----------------------------------------------------
+		   A pool of copies, so rapid clicks overlap instead of
+		   cutting each other off. Capture phase, so it still
+		   fires for handlers that stop propagation — and it
+		   never touches the shuffle, which listens separately. */
+
+		const source =
+			document.getElementById(
+				'click-sfx'
+			);
+
+
+		const POOL_SIZE = 5;
+
+		const pool = [];
+
+		let poolIndex = 0;
+
+
+		if (source) {
+
+			for (
+				let i = 0;
+				i < POOL_SIZE;
+				i += 1
+			) {
+
+				const clip =
+					new Audio(
+						source.getAttribute('src')
+					);
+
+				clip.volume = 0.25;
+
+				clip.preload = 'auto';
+
+				pool.push(clip);
+			}
+		}
+
+
+		function playClick() {
+
+			if (!pool.length) {
+				return;
+			}
+
+
+			const clip =
+				pool[poolIndex];
+
+			poolIndex =
+				(poolIndex + 1) % pool.length;
+
+
+			try {
+
+				clip.currentTime = 0;
+
+
+				const played =
+					clip.play();
+
+
+				/*
+				 * Swallow the rejection browsers hand
+				 * back when they still consider audio
+				 * locked, or when the file is missing.
+				 */
+				if (
+					played &&
+					typeof played.catch ===
+						'function'
+				) {
+					played.catch(() => {});
+				}
+
+			} catch (error) {
+				/* no sound is fine; never break the click */
+			}
+		}
+
+
+		document.addEventListener(
+			'click',
+			() => {
+
+				playClick();
+
+				unlockAudio();
+			},
+			{ capture: true }
+		);
+
+
+		/* -----------------------------------------------------
+		   YOUTUBE IFRAME PLAYER API
+		   ----------------------------------------------------- */
+
+		if (!frame) {
+			return;
+		}
+
+
+		paintButton();
+
+
+		window.onYouTubeIframeAPIReady = () => {
+
+			player =
+				new window.YT.Player(
+					'bg-music',
+					{
+						events: {
+
+							onReady: () => {
+
+								playerReady = true;
+
+
+								/*
+								 * Keep it muted and looping
+								 * until the visitor asks for
+								 * sound.
+								 */
+								player.mute();
+
+
+								if (
+									wantsPlay ||
+									wantsMusicOn
+								) {
+									player.playVideo();
+								}
+
+
+								if (wantsMusicOn) {
+
+									wantsMusicOn = false;
+
+
+									toggleMusic();
+								}
+							},
+
+
+							/*
+							 * loop=1 + playlist= normally
+							 * handles the repeat; this is
+							 * the belt-and-braces version
+							 * for browsers where it drops
+							 * out after one pass.
+							 */
+							onStateChange: (event) => {
+
+								if (
+									event.data ===
+									window.YT.PlayerState.ENDED
+								) {
+									player.playVideo();
+								}
+							}
+						}
+					}
+				);
+		};
+
+
+		const api =
+			document.createElement('script');
+
+		api.src =
+			'https://www.youtube.com/iframe_api';
+
+		document.head.appendChild(api);
+	}
+
+
 	/* GO ------------------------------------------------------------------- */
 
 	initDate();
@@ -1953,5 +2316,6 @@
 	initDrawOn();
 	initFlight();
 	initSocials();
+	initAudio();
 
 })();

@@ -7,7 +7,7 @@
    4. Layout, zones, collage grid  10. Line-draw animation
    5. Header, now box, callouts,   11. Responsive + reduced motion
       quote box                    12. Custom pink cursor
-   6. Photos / polaroids
+   6. Photos / polaroids           13. Floating music toggle
    ========================================================================= */
 
 
@@ -255,6 +255,15 @@ a {
 	margin: 0.5rem 0 0;
 	font-size: 1.15rem;
 	color: var(--ink-soft);
+}
+
+/* second line of the tagline — a touch smaller and lighter, so it reads as a subtitle */
+.masthead-tagline-sub {
+	display: block;
+	font-size: 0.85em;
+	font-weight: 300;
+	color: var(--ink-soft);
+	opacity: 0.72;
 }
 
 
@@ -855,5 +864,131 @@ a {
 	.polaroid,
 	.route-zone {
 		cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='12' fill='%23e46a91' fill-opacity='.22'/%3E%3Ccircle cx='14' cy='14' r='6' fill='%23e46a91' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E") 14 14, pointer;
+	}
+}
+
+
+/* 13. FLOATING MUSIC TOGGLE ------------------------------------------------
+   Sits in the bottom-right corner over everything else. It doesn't hold the
+   audio itself — the hidden YouTube embed does — this just mutes/un-mutes it
+   through the IFrame Player API. Off (muted) = crossed-out speaker, with a soft
+   halo pulsing out of the circle to catch the eye; on = music note, with the
+   note gently bobbing while the track plays. The handwritten label ("play" /
+   "playing", written by JS) sits to the left of the circle, never over it.
+   ------------------------------------------------------------------------- */
+
+/* the dock holds the label + the button, and does the fixed positioning */
+.music-dock {
+	position: fixed;
+	right: 22px;
+	bottom: 22px;
+	z-index: 40;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.music-toggle-label {
+	font-family: var(--hand);
+	font-size: 1.35rem;
+	line-height: 1;
+	color: var(--ink-soft);
+	white-space: nowrap;
+	/* a hair less tilt than the button, like a note scribbled beside it */
+	transform: rotate(-3deg);
+	transition: color 0.2s ease-out;
+	pointer-events: none;
+}
+
+.music-dock:hover .music-toggle-label {
+	color: var(--ink);
+}
+
+.music-toggle {
+	display: grid;
+	place-items: center;
+	width: 68px;
+	height: 68px;
+	padding: 0;
+	color: var(--ink);
+	font-family: var(--body);
+	font-size: 1.45rem;
+	line-height: 1;
+	background: var(--card);
+	border: 2.5px solid var(--ink);
+	/* the same wobbly hand-drawn edge the callouts use, rounded a little more */
+	border-radius: 48% 52% 46% 54% / 52% 46% 54% 48%;
+	box-shadow: 3px 4px 0 rgba(39, 37, 31, 0.18);
+	transform: rotate(-4deg);
+	transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, background-color 0.2s ease-out;
+}
+
+.music-toggle:hover {
+	background: var(--yellow);
+	box-shadow: 4px 6px 0 rgba(39, 37, 31, 0.22);
+	transform: rotate(-4deg) translate(-1px, -2px) scale(1.05);
+}
+
+.music-toggle:active {
+	box-shadow: 1px 2px 0 rgba(39, 37, 31, 0.22);
+	transform: rotate(-4deg) translate(1px, 2px) scale(0.98);
+}
+
+/* muted — a soft halo breathes out of the circle every 2s so the button gets
+   noticed. It only animates box-shadow, so the tilt and hover lift are untouched;
+   it stands down on hover/press to let those shadows show through. (The global
+   reduced-motion rule at the end of section 11 already stops it.) */
+.music-toggle[aria-pressed="false"] {
+	animation: music-pulse 2s ease-in-out infinite;
+}
+
+.music-toggle:hover,
+.music-toggle:active {
+	animation: none;
+}
+
+@keyframes music-pulse {
+	0%, 100% {
+		box-shadow:
+			3px 4px 0 rgba(39, 37, 31, 0.18),
+			0 0 0 0 rgba(228, 106, 145, 0.5);
+	}
+
+	50% {
+		box-shadow:
+			3px 4px 0 rgba(39, 37, 31, 0.18),
+			0 0 0 13px rgba(228, 106, 145, 0);
+	}
+}
+
+/* playing */
+.music-toggle[aria-pressed="true"] {
+	background: var(--pink);
+}
+
+.music-toggle[aria-pressed="true"] .music-toggle-icon {
+	animation: music-bob 1.6s ease-in-out infinite;
+}
+
+@keyframes music-bob {
+	0%, 100% { transform: translateY(0) rotate(-6deg); }
+	50%      { transform: translateY(-3px) rotate(6deg); }
+}
+
+@media (max-width: 560px) {
+	.music-dock {
+		right: 14px;
+		bottom: 14px;
+		gap: 8px;
+	}
+
+	.music-toggle {
+		width: 58px;
+		height: 58px;
+		font-size: 1.2rem;
+	}
+
+	.music-toggle-label {
+		font-size: 1.2rem;
 	}
 }
