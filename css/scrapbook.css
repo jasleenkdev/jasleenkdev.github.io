@@ -15,8 +15,13 @@
 :root {
 	--paper: #fbf9f3;
 	--card: #fffdf8;
-	--grid-minor: rgba(84, 132, 196, 0.13);
-	--grid-major: rgba(84, 132, 196, 0.26);
+	/* Grid-line ink, kept here as the written record of the colour. The graph
+	   paper in section 2 is an SVG tile, and a data URI cannot read a custom
+	   property (same constraint as the cursors in section 12), so it carries
+	   #5484c4 + these opacities literally. Change one, change the other.
+	   Opacities were .13/.26 before the grid was redrawn. */
+	--grid-minor: rgba(84, 132, 196, 0.20);
+	--grid-major: rgba(84, 132, 196, 0.34);
 
 	--ink: #27251f;
 	--ink-soft: #5d584d;
@@ -47,6 +52,31 @@
 	box-sizing: border-box;
 }
 
+/* THE PAPER ITSELF -------------------------------------------------------
+   Both the paper colour and the graph-paper grid sit on <html>, not on <body>.
+
+   They were on body, which normally propagates to the page canvas and is the
+   usual way to do this. Safari did not propagate it: the exact same
+   background-image painted perfectly on a plain fixed <div>, and computed
+   correctly on body via getComputedStyle, but never reached the visible page.
+   Putting it on the root element skips propagation altogether — the root's
+   background IS the canvas — so there is nothing left to go wrong.
+
+   The grid is one 100px SVG tile carrying both rules: minor lines every 20px,
+   a heavier major line every 100px. It replaced four stacked linear-gradient()
+   layers that Safari also declined to paint. Do not move this back onto body,
+   and do not "simplify" it back into gradients.
+
+   Colours are the --grid-minor / --grid-major tokens from section 1, written
+   literally as #5484c4 + stroke-opacity because a data URI cannot see custom
+   properties (same constraint as the cursors in section 12).
+   ------------------------------------------------------------------------- */
+html {
+	background-color: var(--paper);
+	background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='100'%20height='100'%3E%3Cg%20shape-rendering='crispEdges'%20fill='none'%3E%3Cpath%20d='M0%200.5H100M0%2020.5H100M0%2040.5H100M0%2060.5H100M0%2080.5H100M0.5%200V100M20.5%200V100M40.5%200V100M60.5%200V100M80.5%200V100'%20stroke='%235484c4'%20stroke-opacity='0.20'%20stroke-width='1'/%3E%3Cpath%20d='M0%200.5H100M0.5%200V100'%20stroke='%235484c4'%20stroke-opacity='0.34'%20stroke-width='1'/%3E%3C/g%3E%3C/svg%3E");
+	background-size: 100px 100px;
+}
+
 body {
 	position: relative;
 	min-height: 100vh;
@@ -56,14 +86,10 @@ body {
 	font-family: var(--body);
 	font-size: 17px;
 	line-height: 1.5;
-	background-color: var(--paper);
-	/* major grid every 100px, minor grid every 20px */
-	background-image:
-		linear-gradient(var(--grid-major) 1px, transparent 1px),
-		linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
-		linear-gradient(var(--grid-minor) 1px, transparent 1px),
-		linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px);
-	background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+	/* The paper and its grid live on <html> above, not here. Body must stay
+	   transparent: an opaque background here would paint straight over the
+	   grid, since body's box covers the whole page. */
+	background-color: transparent;
 }
 
 img {
@@ -961,6 +987,14 @@ a {
 	}
 }
 
+/* clicked before the YouTube API had finished loading — the intent is queued,
+   so the button shows it is thinking rather than looking broken (Safari is
+   regularly slow enough here to be seen). */
+.music-toggle.is-waiting {
+	animation: none;
+	opacity: 0.7;
+}
+
 /* playing */
 .music-toggle[aria-pressed="true"] {
 	background: var(--pink);
@@ -991,4 +1025,30 @@ a {
 	.music-toggle-label {
 		font-size: 1.2rem;
 	}
+}
+
+
+/* audio debug read-out, only built when the URL carries ?audiodebug=1.
+   It exists because Safari on an iPhone has no console to open. */
+.audio-debug {
+	position: fixed;
+	top: 8px;
+	left: 8px;
+	z-index: 90;
+	max-width: min(380px, calc(100vw - 16px));
+	max-height: 45vh;
+	overflow: hidden;
+	padding: 8px 10px;
+	color: #f6f4ec;
+	font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+	font-size: 11px;
+	line-height: 1.45;
+	background: rgba(24, 22, 18, 0.88);
+	border-radius: 8px;
+	pointer-events: none;
+}
+
+.audio-debug p {
+	margin: 0;
+	word-break: break-word;
 }

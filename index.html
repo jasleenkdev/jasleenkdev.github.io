@@ -360,18 +360,22 @@
 
 	<!-- =====================================================================
 	     AUDIO
-	     Background music is a hidden YouTube embed (1x1px, invisible): browsers
-	     block un-muted autoplay, so it starts muted and the floating button
-	     below un-mutes it through the YouTube IFrame Player API. enablejsapi=1
-	     is what lets the API talk to this iframe; playlist= repeats the same
-	     video id as embed/ because that is how YouTube makes loop=1 work for a
-	     single video.
+	     Background music is a YouTube embed, hidden but deliberately NOT
+	     zero-sized and NOT opacity:0 — WebKit throttles or refuses media in
+	     elements it considers invisible, which is one reason this worked in
+	     Chrome and not in Safari. So it keeps a real 320x180 box, sits behind
+	     the page (z-index:-1, behind the page) and takes no clicks. Browsers block un-muted autoplay, so it starts muted and the
+	     floating button un-mutes it through the YouTube IFrame Player API.
+	     enablejsapi=1 is what lets the API talk to this iframe; playlist=
+	     repeats the same video id as embed/ because that is how YouTube makes
+	     loop=1 work for a single video; playsinline=1 keeps iOS from taking
+	     it fullscreen.
 	     ===================================================================== -->
-		 <iframe id="bg-music" width="1" height="1" title="Background music"
-		 style="opacity:0; pointer-events:none; position:absolute;"
-		 src="https://www.youtube.com/embed/XCXXcaS9xec?autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=XCXXcaS9xec&amp;enablejsapi=1&amp;playsinline=1"
-		 allow="autoplay; encrypted-media">
-	 </iframe>
+	<iframe id="bg-music" width="320" height="180" title="Background music"
+		style="position: fixed; right: 0; bottom: 0; z-index: -1; border: 0; opacity: 0.004; pointer-events: none;"
+		src="https://www.youtube.com/embed/XCXXcaS9xec?autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=XCXXcaS9xec&amp;enablejsapi=1&amp;playsinline=1"
+		allow="autoplay; encrypted-media">
+	</iframe>
 
 	<!-- the click/pop sound effect, played on every click anywhere on the page -->
 	<!-- EDIT ME: drop a short, quiet royalty-free click at this path -->

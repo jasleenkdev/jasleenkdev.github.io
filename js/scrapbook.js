@@ -1948,14 +1948,24 @@
 
 	/* 7. AUDIO -------------------------------------------------------------
 	   Two separate things that share one rule: browsers only let a page make
-	   noise after the visitor has interacted with it.
+	   noise after the visitor has interacted with it. Safari (WebKit) is much
+	   stricter than Chrome about what counts, so the notes below say why each
+	   piece is shaped the way it is.
 
+	   - The click sound is a pool of <audio> copies. WebKit will not even load
+	     media until a gesture asks for it, grants playback per element, and
+	     throws if you seek a clip that has no data yet — so every play() call
+	     stays synchronous inside the gesture, and the seek is guarded.
 	   - Background music lives in the hidden #bg-music YouTube embed. It
-	     autoplays muted (which browsers do allow), and the floating button
-	     un-mutes it through the YouTube IFrame Player API.
-	   - The click sound plays on every click anywhere on the page. The very
-	     first click is also what unlocks audio for the session, so it both
-	     pops and gets the muted embed rolling.
+	     autoplays muted and the floating button un-mutes it through the
+	     YouTube IFrame Player API. Safari does NOT propagate user activation
+	     into cross-origin iframes, so the un-mute can be refused inside the
+	     embed even though our click was perfectly real. We therefore verify
+	     afterwards and tell the truth in the UI rather than showing "playing"
+	     over silence.
+
+	   Add ?audiodebug=1 to the URL to log every step (and show it on screen,
+	   for phones that have no console to open).
 	   ---------------------------------------------------------------------- */
 
 	function initAudio() {
@@ -1976,31 +1986,338 @@
 			);
 
 
+		/* -----------------------------------------------------
+		   DEBUG LOG  (?audiodebug=1)
+		   ----------------------------------------------------- */
+
+		const debugOn =
+			/[?&]audiodebug=1\b/.test(
+				window.location.search
+			);
+
+		let debugPanel = null;
+
+
+		function logAudio(message, detail) {
+
+			if (!debugOn) {
+				return;
+			}
+
+
+			const text =
+				detail === undefined
+					? message
+					: message + ' — ' + detail;
+
+
+			window.console.log(
+				'[audio]',
+				message,
+				detail === undefined
+					? ''
+					: detail
+			);
+
+
+			if (!debugPanel) {
+
+				debugPanel =
+					document.createElement('div');
+
+				debugPanel.className =
+					'audio-debug';
+
+				document.body.appendChild(
+					debugPanel
+				);
+			}
+
+
+			const line =
+				document.createElement('p');
+
+			line.textContent = text;
+
+			debugPanel.appendChild(line);
+
+
+			/* keep the panel short enough to read */
+			while (debugPanel.children.length > 14) {
+
+				debugPanel.removeChild(
+					debugPanel.firstChild
+				);
+			}
+		}
+
+
+		function describeError(error) {
+
+			if (!error) {
+				return 'unknown error';
+			}
+
+
+			return (
+				(error.name || 'Error') +
+				': ' +
+				(error.message || String(error))
+			);
+		}
+
+
+		/* =====================================================
+		   CLICK SOUND
+		   =====================================================
+		   Set up first, so a missing/blocked YouTube embed can
+		   never take the click sound down with it. */
+
+		const source =
+			document.getElementById(
+				'click-sfx'
+			);
+
+
+		const POOL_SIZE = 5;
+
+		const pool = [];
+
+		let poolIndex = 0;
+
+		let poolPrimed = false;
+
+
+		if (source) {
+
+			for (
+				let i = 0;
+				i < POOL_SIZE;
+				i += 1
+			) {
+
+				const clip =
+					new Audio(
+						source.getAttribute('src')
+					);
+
+				/*
+				 * iOS ignores volume entirely (it is
+				 * read-only there and the hardware
+				 * buttons own it), so the clip itself
+				 * needs to be quiet on disk.
+				 */
+				clip.volume = 0.25;
+
+				clip.preload = 'auto';
+
+				pool.push(clip);
+			}
+		}
+
+
 		/*
-		 * The YT player object, once the API has
-		 * loaded and hooked itself onto the iframe.
-		 * Until then the button is a no-op.
+		 * WebKit refuses to fetch media that no gesture has
+		 * asked for, so clips 2..5 can still be empty when
+		 * their turn comes round. On the first gesture we call
+		 * load() on them — allowed here because we are inside
+		 * that gesture — and clip 1 gets primed simply by
+		 * being the one that plays for this very click.
 		 */
+		function primePool() {
+
+			if (poolPrimed) {
+				return;
+			}
+
+
+			poolPrimed = true;
+
+
+			pool.forEach((clip) => {
+
+				if (clip.readyState > 0) {
+					return;
+				}
+
+
+				try {
+					clip.load();
+				} catch (error) {
+					logAudio(
+						'pool load failed',
+						describeError(error)
+					);
+				}
+			});
+		}
+
+
+		function playClick() {
+
+			if (!pool.length) {
+				return;
+			}
+
+
+			const clip =
+				pool[poolIndex];
+
+			poolIndex =
+				(poolIndex + 1) % pool.length;
+
+
+			/*
+			 * Safari throws InvalidStateError when you seek
+			 * a clip whose readyState is still HAVE_NOTHING,
+			 * and that would abort the handler before play()
+			 * ever ran — which is exactly why this worked in
+			 * Chrome and did nothing in Safari. So the seek
+			 * gets its own guard and its own try/catch, and
+			 * play() happens no matter what it does.
+			 */
+			if (clip.readyState > 0) {
+
+				try {
+					clip.currentTime = 0;
+				} catch (error) {
+					logAudio(
+						'seek refused',
+						describeError(error)
+					);
+				}
+			}
+
+
+			/*
+			 * Nothing async may sit between the gesture and
+			 * this call, or WebKit stops treating it as
+			 * user-initiated.
+			 */
+			try {
+
+				const played =
+					clip.play();
+
+
+				if (
+					played &&
+					typeof played.catch ===
+						'function'
+				) {
+
+					played.catch((error) => {
+						logAudio(
+							'click sound blocked',
+							describeError(error)
+						);
+					});
+				}
+
+			} catch (error) {
+
+				logAudio(
+					'click sound threw',
+					describeError(error)
+				);
+			}
+		}
+
+
+		/* -----------------------------------------------------
+		   UNLOCK: first interaction of the session
+		   -----------------------------------------------------
+		   Nudges the muted embed into playing, so that when the
+		   visitor does hit the button there is already a running
+		   video to un-mute. */
+
+		let unlocked = false;
+
+		let wantsPlay = false;
+
+
+		function unlockAudio() {
+
+			if (unlocked) {
+				return;
+			}
+
+
+			unlocked = true;
+
+			logAudio('audio unlocked by first gesture');
+
+
+			if (playerReady && player) {
+				player.playVideo();
+			} else {
+				wantsPlay = true;
+			}
+		}
+
+
+		/* -----------------------------------------------------
+		   WHAT COUNTS AS A CLICK
+		   -----------------------------------------------------
+		   iOS Safari only bubbles `click` up to the document
+		   from elements it already considers clickable, so taps
+		   on empty paper never reached a document-level click
+		   listener. pointerdown covers mouse and touch alike,
+		   is a trusted gesture in WebKit, and fires a touch
+		   earlier so the pop feels immediate. */
+
+		function onGesture() {
+
+			playClick();
+
+			primePool();
+
+			unlockAudio();
+		}
+
+
+		if (window.PointerEvent) {
+
+			document.addEventListener(
+				'pointerdown',
+				onGesture,
+				{ capture: true }
+			);
+
+		} else {
+
+			document.addEventListener(
+				'mousedown',
+				onGesture,
+				{ capture: true }
+			);
+
+			document.addEventListener(
+				'touchstart',
+				onGesture,
+				{ capture: true, passive: true }
+			);
+		}
+
+
+		/* =====================================================
+		   BACKGROUND MUSIC
+		   ===================================================== */
+
 		let player = null;
 
 		let playerReady = false;
 
 		let musicOn = false;
 
-
-		/*
-		 * Set if the visitor clicked (or hit the
-		 * button) before the API finished loading,
-		 * so we can act on it the moment it is ready.
-		 */
-		let wantsPlay = false;
-
+		/* a click that arrived before the API had loaded */
 		let wantsMusicOn = false;
 
+		/* 'idle' | 'waiting' | 'blocked' */
+		let musicNote = 'idle';
 
-		/* -----------------------------------------------------
-		   THE FLOATING BUTTON'S LOOK
-		   ----------------------------------------------------- */
+		let verifyTimer = 0;
+
 
 		function paintButton() {
 
@@ -2038,59 +2355,192 @@
 			}
 
 
+			button.classList.toggle(
+				'is-waiting',
+				musicNote === 'waiting'
+			);
+
+
 			if (label) {
 
-				label.textContent =
-					musicOn
-						? 'playing'
-						: 'play';
+				if (musicNote === 'waiting') {
+
+					label.textContent = 'loading…';
+
+				} else if (musicNote === 'blocked') {
+
+					/*
+					 * Safari refused the un-mute. Say so
+					 * instead of claiming to be playing:
+					 * one more click, now that the player
+					 * is ready, usually lands.
+					 */
+					label.textContent = 'tap again';
+
+				} else {
+
+					label.textContent =
+						musicOn
+							? 'playing'
+							: 'play';
+				}
 			}
 		}
 
 
-		/* -----------------------------------------------------
-		   UNLOCK: first interaction of the session
-		   -----------------------------------------------------
-		   Nudges the muted embed into playing, so that when the
-		   visitor does hit the button there is already a running
-		   video to un-mute. */
+		/*
+		 * The embed is cross-origin, so every call below is
+		 * really a postMessage: it can be quietly refused
+		 * inside the iframe. A moment later we ask the player
+		 * what actually happened and correct the UI.
+		 */
+		function verifyMusic(expectOn) {
 
-		let unlocked = false;
-
-
-		function unlockAudio() {
-
-			if (unlocked) {
-				return;
-			}
+			window.clearTimeout(verifyTimer);
 
 
-			unlocked = true;
+			verifyTimer =
+				window.setTimeout(() => {
+
+					if (!player || !playerReady) {
+						return;
+					}
 
 
-			if (playerReady && player) {
-				player.playVideo();
-			} else {
-				wantsPlay = true;
-			}
+					let muted = true;
+
+					let state = -1;
+
+
+					try {
+
+						muted =
+							player.isMuted();
+
+						state =
+							player.getPlayerState();
+
+					} catch (error) {
+
+						logAudio(
+							'player query failed',
+							describeError(error)
+						);
+
+						return;
+					}
+
+
+					const playing =
+						state ===
+							window.YT.PlayerState.PLAYING ||
+						state ===
+							window.YT.PlayerState.BUFFERING;
+
+
+					logAudio(
+						'after toggle',
+						'muted=' + muted +
+							' state=' + state
+					);
+
+
+					if (!expectOn) {
+						return;
+					}
+
+
+					if (muted || !playing) {
+
+						/*
+						 * Safari does not hand user
+						 * activation to a cross-origin
+						 * iframe, so the un-mute (or the
+						 * play) can be dropped even
+						 * though the click was real.
+						 */
+						logAudio(
+							'un-mute refused by the browser'
+						);
+
+						musicOn = false;
+
+						musicNote = 'blocked';
+
+						paintButton();
+
+					} else if (musicNote !== 'idle') {
+
+						musicNote = 'idle';
+
+						paintButton();
+					}
+				}, 700);
 		}
 
 
-		/* -----------------------------------------------------
-		   THE TOGGLE ITSELF
-		   ----------------------------------------------------- */
+		/*
+		 * Must be called straight from the click handler —
+		 * no awaiting, no timers in front of it — so the
+		 * gesture is still live when the postMessage goes out.
+		 */
+		function applyMusic(on) {
+
+			try {
+
+				if (on) {
+
+					player.unMute();
+
+					player.setVolume(35);
+
+					player.playVideo();
+
+				} else {
+
+					player.mute();
+
+					player.pauseVideo();
+				}
+
+			} catch (error) {
+
+				logAudio(
+					'player command failed',
+					describeError(error)
+				);
+			}
+
+
+			verifyMusic(on);
+		}
+
 
 		function toggleMusic() {
 
 			if (!playerReady || !player) {
 
 				/*
-				 * API still loading — remember the
-				 * intent and apply it on ready.
+				 * The API has not finished loading. Queue
+				 * the intent AND show it, so the button
+				 * never looks dead — Safari is regularly
+				 * slow enough here for that to be visible.
 				 */
 				wantsMusicOn = !wantsMusicOn;
 
 				wantsPlay = true;
+
+				musicNote =
+					wantsMusicOn
+						? 'waiting'
+						: 'idle';
+
+				logAudio(
+					'clicked before the player was ready',
+					'queued=' + wantsMusicOn
+				);
+
+				paintButton();
 
 				return;
 			}
@@ -2098,22 +2548,9 @@
 
 			musicOn = !musicOn;
 
+			musicNote = 'idle';
 
-			if (musicOn) {
-
-				player.unMute();
-
-				player.setVolume(35);
-
-				player.playVideo();
-
-			} else {
-
-				player.mute();
-
-				player.pauseVideo();
-			}
-
+			applyMusic(musicOn);
 
 			paintButton();
 		}
@@ -2129,100 +2566,120 @@
 
 
 		/* -----------------------------------------------------
-		   CLICK SOUND
+		   WHICH VIDEO
 		   -----------------------------------------------------
-		   A pool of copies, so rapid clicks overlap instead of
-		   cutting each other off. Capture phase, so it still
-		   fires for handlers that stop propagation — and it
-		   never touches the shuffle, which listens separately. */
+		   Read straight out of the iframe's own src, so the id
+		   lives in exactly one place. Nothing here may ever
+		   carry a second, literal id — that is how an embed
+		   ends up playing something nobody asked for. */
 
-		const source =
-			document.getElementById(
-				'click-sfx'
-			);
+		function expectedVideoId() {
 
-
-		const POOL_SIZE = 5;
-
-		const pool = [];
-
-		let poolIndex = 0;
-
-
-		if (source) {
-
-			for (
-				let i = 0;
-				i < POOL_SIZE;
-				i += 1
-			) {
-
-				const clip =
-					new Audio(
-						source.getAttribute('src')
-					);
-
-				clip.volume = 0.25;
-
-				clip.preload = 'auto';
-
-				pool.push(clip);
+			if (!frame) {
+				return '';
 			}
+
+
+			const match =
+				/\/embed\/([A-Za-z0-9_-]{11})/.exec(
+					frame.getAttribute('src') || ''
+				);
+
+
+			return match
+				? match[1]
+				: '';
 		}
 
 
-		function playClick() {
+		/* what the player says it is actually playing */
+		function currentVideoId() {
 
-			if (!pool.length) {
-				return;
+			if (!player || !playerReady) {
+				return '';
 			}
-
-
-			const clip =
-				pool[poolIndex];
-
-			poolIndex =
-				(poolIndex + 1) % pool.length;
 
 
 			try {
 
-				clip.currentTime = 0;
-
-
-				const played =
-					clip.play();
-
-
-				/*
-				 * Swallow the rejection browsers hand
-				 * back when they still consider audio
-				 * locked, or when the file is missing.
-				 */
-				if (
-					played &&
-					typeof played.catch ===
+				const data =
+					typeof player.getVideoData ===
 						'function'
-				) {
-					played.catch(() => {});
-				}
+						? player.getVideoData()
+						: null;
+
+
+				return (
+					data &&
+					data.video_id
+				)
+					? data.video_id
+					: '';
 
 			} catch (error) {
-				/* no sound is fine; never break the click */
+
+				logAudio(
+					'could not read video data',
+					describeError(error)
+				);
+
+				return '';
 			}
 		}
 
 
-		document.addEventListener(
-			'click',
-			() => {
+		/*
+		 * If the player has drifted onto another video — a
+		 * suggested/related one after the loop fails to catch,
+		 * which is the one way this embed can change track —
+		 * put it back on the one the src asked for.
+		 */
+		function keepOnTrack() {
 
-				playClick();
+			const wanted =
+				expectedVideoId();
 
-				unlockAudio();
-			},
-			{ capture: true }
-		);
+			const playing =
+				currentVideoId();
+
+
+			if (
+				!wanted ||
+				!playing ||
+				playing === wanted
+			) {
+				return false;
+			}
+
+
+			logAudio(
+				'WRONG VIDEO',
+				'playing ' + playing +
+					', expected ' + wanted +
+					' — reloading'
+			);
+
+
+			try {
+
+				player.loadVideoById(wanted);
+
+
+				if (!musicOn) {
+					player.mute();
+				}
+
+			} catch (error) {
+
+				logAudio(
+					'reload failed',
+					describeError(error)
+				);
+			}
+
+
+			return true;
+		}
 
 
 		/* -----------------------------------------------------
@@ -2239,6 +2696,9 @@
 
 		window.onYouTubeIframeAPIReady = () => {
 
+			logAudio('YouTube API script ready');
+
+
 			player =
 				new window.YT.Player(
 					'bg-music',
@@ -2249,13 +2709,29 @@
 
 								playerReady = true;
 
+								logAudio(
+									'player ready',
+									'expected ' +
+										expectedVideoId() +
+										', loaded ' +
+										(currentVideoId() ||
+											'unknown')
+								);
+
 
 								/*
 								 * Keep it muted and looping
 								 * until the visitor asks for
 								 * sound.
 								 */
-								player.mute();
+								try {
+									player.mute();
+								} catch (error) {
+									logAudio(
+										'mute failed',
+										describeError(error)
+									);
+								}
 
 
 								if (
@@ -2270,9 +2746,39 @@
 
 									wantsMusicOn = false;
 
+									musicOn = true;
 
-									toggleMusic();
+
+									/*
+									 * This un-mute is running
+									 * from an API callback, not
+									 * from the click itself, so
+									 * the gesture is long gone.
+									 * Chrome usually allows it;
+									 * Safari usually will not —
+									 * verifyMusic() will catch
+									 * that and ask for one more
+									 * tap.
+									 */
+									applyMusic(true);
+
+									paintButton();
+
+								} else if (musicNote === 'waiting') {
+
+									musicNote = 'idle';
+
+									paintButton();
 								}
+							},
+
+
+							onError: (event) => {
+
+								logAudio(
+									'player error',
+									'code ' + event.data
+								);
 							},
 
 
@@ -2285,10 +2791,49 @@
 							 */
 							onStateChange: (event) => {
 
+								logAudio(
+									'state',
+									event.data +
+										' · video ' +
+										(currentVideoId() ||
+											'unknown')
+								);
+
+
+								/*
+								 * Any state change is a chance
+								 * to notice the player has been
+								 * moved onto another video.
+								 */
+								if (keepOnTrack()) {
+									return;
+								}
+
+
 								if (
 									event.data ===
 									window.YT.PlayerState.ENDED
 								) {
+
+									/*
+									 * Rewind rather than calling
+									 * playVideo() blind: by the
+									 * time ENDED lands, YouTube
+									 * may already have queued a
+									 * suggested video, and a
+									 * bare playVideo() would
+									 * happily start THAT.
+									 */
+									try {
+										player.seekTo(0, true);
+									} catch (error) {
+										logAudio(
+											'rewind failed',
+											describeError(error)
+										);
+									}
+
+
 									player.playVideo();
 								}
 							}
@@ -2298,11 +2843,39 @@
 		};
 
 
+		/*
+		 * If the API never arrives (an extension, a blocker or
+		 * Safari's tracking prevention can all stop it), say so
+		 * rather than leaving a button that does nothing.
+		 */
+		window.setTimeout(() => {
+
+			if (!playerReady) {
+
+				logAudio(
+					'YouTube API still not ready after 8s'
+				);
+
+
+				if (musicNote === 'waiting') {
+
+					musicNote = 'blocked';
+
+					paintButton();
+				}
+			}
+		}, 8000);
+
+
 		const api =
 			document.createElement('script');
 
 		api.src =
 			'https://www.youtube.com/iframe_api';
+
+		api.onerror = () => {
+			logAudio('YouTube API script failed to load');
+		};
 
 		document.head.appendChild(api);
 	}
