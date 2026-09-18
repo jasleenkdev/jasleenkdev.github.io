@@ -1,34 +1,15 @@
-/* =========================================================================
-   scrapbook.css — hand-drawn moodboard on graph paper
-   -------------------------------------------------------------------------
-   1. Tokens (colours, fonts)       7. Projects
-   2. Base + graph paper            8. Chandigarh ⇄ Patiala route
-   3. Doodle layer                  9. Links + footer
-   4. Layout, zones, collage grid  10. Line-draw animation
-   5. Header, now box, callouts,   11. Responsive + reduced motion
-      quote box                    12. Custom pink cursor
-   6. Photos / polaroids           13. Floating music toggle
-   ========================================================================= */
-
-
-/* 1. TOKENS ---------------------------------------------------------------- */
 :root {
 	--paper: #fbf9f3;
 	--card: #fffdf8;
-	/* Grid-line ink, kept here as the written record of the colour. The graph
-	   paper in section 2 is an SVG tile, and a data URI cannot read a custom
-	   property (same constraint as the cursors in section 12), so it carries
-	   #5484c4 + these opacities literally. Change one, change the other.
-	   Opacities were .13/.26 before the grid was redrawn. */
+
 	--grid-minor: rgba(84, 132, 196, 0.20);
 	--grid-major: rgba(84, 132, 196, 0.34);
 
 	--ink: #27251f;
 	--ink-soft: #5d584d;
 	--pen-blue: #3957c8;
-	--pink-ink: #e46a91; /* name underline, pink doodles, cursor */
+	--pink-ink: #e46a91;
 
-	/* highlighter / sticky-note colours */
 	--yellow: #ffe57a;
 	--pink: #ffc4d3;
 	--mint: #c3ebd3;
@@ -40,37 +21,15 @@
 	--hand: 'Caveat', 'Segoe Print', 'Comic Sans MS', cursive;
 	--body: 'Kalam', 'Segoe Print', 'Comic Sans MS', cursive;
 
-	/* the classic wobbly "hand-drawn" border radius */
 	--sketchy: 255px 14px 225px 14px / 14px 225px 14px 255px;
 }
 
-
-/* 2. BASE + GRAPH PAPER ---------------------------------------------------- */
 *,
 *::before,
 *::after {
 	box-sizing: border-box;
 }
 
-/* THE PAPER ITSELF -------------------------------------------------------
-   Both the paper colour and the graph-paper grid sit on <html>, not on <body>.
-
-   They were on body, which normally propagates to the page canvas and is the
-   usual way to do this. Safari did not propagate it: the exact same
-   background-image painted perfectly on a plain fixed <div>, and computed
-   correctly on body via getComputedStyle, but never reached the visible page.
-   Putting it on the root element skips propagation altogether — the root's
-   background IS the canvas — so there is nothing left to go wrong.
-
-   The grid is one 100px SVG tile carrying both rules: minor lines every 20px,
-   a heavier major line every 100px. It replaced four stacked linear-gradient()
-   layers that Safari also declined to paint. Do not move this back onto body,
-   and do not "simplify" it back into gradients.
-
-   Colours are the --grid-minor / --grid-major tokens from section 1, written
-   literally as #5484c4 + stroke-opacity because a data URI cannot see custom
-   properties (same constraint as the cursors in section 12).
-   ------------------------------------------------------------------------- */
 html {
 	background-color: var(--paper);
 	background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='100'%20height='100'%3E%3Cg%20shape-rendering='crispEdges'%20fill='none'%3E%3Cpath%20d='M0%200.5H100M0%2020.5H100M0%2040.5H100M0%2060.5H100M0%2080.5H100M0.5%200V100M20.5%200V100M40.5%200V100M60.5%200V100M80.5%200V100'%20stroke='%235484c4'%20stroke-opacity='0.20'%20stroke-width='1'/%3E%3Cpath%20d='M0%200.5H100M0.5%200V100'%20stroke='%235484c4'%20stroke-opacity='0.34'%20stroke-width='1'/%3E%3C/g%3E%3C/svg%3E");
@@ -86,9 +45,7 @@ body {
 	font-family: var(--body);
 	font-size: 17px;
 	line-height: 1.5;
-	/* The paper and its grid live on <html> above, not here. Body must stay
-	   transparent: an opaque background here would paint straight over the
-	   grid, since body's box covers the whole page. */
+
 	background-color: transparent;
 }
 
@@ -112,12 +69,11 @@ a {
 	font-size: 2.6rem;
 	font-weight: 700;
 	line-height: 1.1;
-	/* highlighter swipe behind the lower half of the text */
+
 	background: linear-gradient(transparent 55%, var(--yellow) 55%, var(--yellow) 88%, transparent 88%);
 	padding: 0 0.3rem;
 }
 
-/* strip of washi tape across the top edge — add class="taped" */
 .taped::before {
 	content: '';
 	position: absolute;
@@ -130,14 +86,12 @@ a {
 	clip-path: polygon(3% 0, 97% 6%, 100% 50%, 96% 100%, 2% 94%, 0 50%);
 }
 
-
-/* 3. DOODLE LAYER ---------------------------------------------------------- */
 .doodle-layer {
 	position: absolute;
 	inset: 0;
 	z-index: 0;
 	overflow: hidden;
-	pointer-events: none; /* clicks fall through to the paper */
+	pointer-events: none;
 }
 
 .doodle {
@@ -152,13 +106,12 @@ a {
 	stroke-linecap: round;
 	stroke-linejoin: round;
 	opacity: 0.8;
-	/* JS sets transform: translate(x, y) rotate(r); this makes each shuffle glide (with a tiny overshoot) */
+
 	transition:
 		transform 1.1s cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay, 0ms),
 		opacity 0.5s ease;
 }
 
-/* no transition on the very first placement; hidden until placed */
 .doodle-layer.is-placing .doodle {
 	transition: none;
 }
@@ -174,11 +127,9 @@ a {
 .ink-orange { color: #ec7a36; }
 .ink-purple { color: #8a63d2; }
 
-
-/* 4. LAYOUT, ZONES, COLLAGE GRID ------------------------------------------- */
 .board {
 	position: relative;
-	z-index: 1; /* above the doodles */
+	z-index: 1;
 	max-width: 1120px;
 	margin: 0 auto;
 	padding: 48px 24px 40px;
@@ -188,16 +139,10 @@ a {
 	gap: 64px;
 }
 
-/* the static zone (links, projects, cities) is only a wrapper for the code — its sections stay in the board grid */
 .static-zone {
 	display: contents;
 }
 
-/* UPPER SHUFFLE ZONE
-   Text and photos share one 12-column grid. Each child sets its home spot
-   with --place (row / column / span rows / span columns) in the HTML.
-   Rows are at least 30px and stretch to fit content, so nothing overlaps.
-   position: relative makes this the reference box JS measures blocks against. */
 .collage {
 	grid-area: collage;
 	position: relative;
@@ -212,14 +157,10 @@ a {
 	grid-area: var(--place);
 }
 
-/* Shuffled blocks are moved with the `translate` property (set by JS), which
-   stacks with their own rotate/scale `transform`, so hover effects keep working.
-   This glide matches the doodles' timing; each block's transition list includes it. */
 .collage > [data-shuffle] {
 	--shuffle-glide: translate 1.1s cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay, 0ms);
 	translate: 0px 0px;
-	/* Prepare each block's animation layer when the page loads, so the very first
-	   shuffle doesn't hitch while the browser gets the photos ready to move. */
+
 	will-change: translate;
 }
 
@@ -227,15 +168,13 @@ a {
 	will-change: transform;
 }
 
-
-/* 5a. HEADER --------------------------------------------------------------- */
 .masthead {
 	grid-area: head;
 }
 
 .masthead-date {
 	display: inline-block;
-	min-height: 1.3em; /* keeps the space while JS writes the date */
+	min-height: 1.3em;
 	margin: 0;
 	font-family: var(--hand);
 	font-size: 1.6rem;
@@ -256,14 +195,11 @@ a {
 	line-height: 0.95;
 }
 
-/* underline that runs under the name, stretches past it, and sweeps up into an arrow tip.
-   The SVG is 496 units wide where 420 units = the name's width, hence 118% —
-   capped at the page's content width so it never causes sideways scrolling on phones. */
 .name-underline {
 	display: block;
 	width: min(118%, calc(100vw - 32px));
 	height: auto;
-	margin-top: -5%; /* a % of the name's width, so it tucks under the letters at every size */
+	margin-top: -5%;
 	overflow: visible;
 	fill: none;
 	stroke: var(--pink-ink);
@@ -272,7 +208,6 @@ a {
 	stroke-linejoin: round;
 }
 
-/* the arrow tip draws itself in quickly once the line has reached the end */
 .name-underline .underline-arrow {
 	transition: stroke-dashoffset 0.35s ease-out 1.15s;
 }
@@ -283,7 +218,6 @@ a {
 	color: var(--ink-soft);
 }
 
-/* second line of the tagline — a touch smaller and lighter, so it reads as a subtitle */
 .masthead-tagline-sub {
 	display: block;
 	font-size: 0.85em;
@@ -292,8 +226,6 @@ a {
 	opacity: 0.72;
 }
 
-
-/* 5b. NOW BOX -------------------------------------------------------------- */
 .now-box {
 	position: relative;
 	padding: 1rem 1.5rem 1.2rem;
@@ -304,7 +236,6 @@ a {
 	transition: var(--shuffle-glide, translate 0s);
 }
 
-/* a second, looser pen stroke around the box */
 .now-box::after {
 	content: '';
 	position: absolute;
@@ -348,8 +279,6 @@ a {
 	color: var(--pen-blue);
 }
 
-
-/* 5c. CALLOUTS (bio blurbs + project cards) -------------------------------- */
 .callout {
 	--accent: var(--yellow);
 	position: relative;
@@ -389,7 +318,6 @@ a {
 	margin: 0;
 }
 
-/* project name → demo video */
 .demo-link {
 	text-decoration: none;
 }
@@ -400,8 +328,6 @@ a {
 	text-underline-offset: 4px;
 }
 
-
-/* 5d. QUOTE BOX ------------------------------------------------------------ */
 .quote-box {
 	position: relative;
 	display: block;
@@ -439,9 +365,6 @@ a {
 	color: var(--ink-soft);
 }
 
-
-/* 6. PHOTOS / POLAROIDS ---------------------------------------------------- */
-/* fallback tilts if JS is off (JS randomises --rot) */
 .polaroid:nth-of-type(odd)  { --rot: -3deg; }
 .polaroid:nth-of-type(even) { --rot: 4deg; }
 
@@ -456,7 +379,7 @@ a {
 		0 10px 20px -10px rgba(0, 0, 0, 0.3);
 	transform: rotate(var(--rot, 0deg)) scale(1);
 	cursor: zoom-in;
-	/* z-index drops only after the shrink finishes, so the photo doesn't slip under its neighbours mid-animation */
+
 	transition:
 		transform 0.35s cubic-bezier(0.2, 0.8, 0.3, 1.15),
 		box-shadow 0.35s ease,
@@ -477,7 +400,6 @@ a {
 	aspect-ratio: 1 / 1;
 }
 
-/* hover / focus state — toggled by JS on mouseenter / mouseleave */
 .polaroid.is-lifted {
 	z-index: 30;
 	transform: rotate(0deg) scale(1.15);
@@ -519,8 +441,6 @@ a {
 	transform: translate(-50%, 0) rotate(-2deg);
 }
 
-
-/* 7. PROJECTS -------------------------------------------------------------- */
 .projects {
 	grid-area: projects;
 }
@@ -533,7 +453,6 @@ a {
 	margin-top: 2.2rem;
 }
 
-/* stagger the cards so they don't sit in a neat row */
 .project-card:nth-child(2) { margin-top: 40px; }
 .project-card:nth-child(3) { margin-top: 12px; }
 
@@ -572,8 +491,6 @@ a {
 	transform: rotate(-2deg) translateY(-2px);
 }
 
-
-/* 8. CHANDIGARH ⇄ PATIALA ROUTE -------------------------------------------- */
 .route {
 	grid-area: route;
 	padding: 1.2rem clamp(0.75rem, 3vw, 2rem) 1rem;
@@ -598,7 +515,7 @@ a {
 .route-stage {
 	position: relative;
 	width: 100%;
-	aspect-ratio: 1000 / 330; /* matches the SVG viewBox so the hover zones line up */
+	aspect-ratio: 1000 / 330;
 }
 
 .route-svg {
@@ -654,8 +571,6 @@ a {
 	stroke-linecap: round;
 }
 
-/* invisible hover zones covering the sky between the two cities
-   (the flight path runs from x≈21% to x≈81% of the stage) */
 .route-zone {
 	position: absolute;
 	top: 0;
@@ -695,9 +610,6 @@ a {
 	outline-offset: -4px;
 }
 
-
-/* 9. LINKS + FOOTER -------------------------------------------------------- */
-/* links sit against the right edge of the page (heading + icon row) */
 .links {
 	grid-area: links;
 	text-align: right;
@@ -706,14 +618,13 @@ a {
 .social {
 	display: flex;
 	flex-wrap: wrap;
-	justify-content: flex-end; /* row anchored right; icons keep their left-to-right order */
+	justify-content: flex-end;
 	gap: 18px 36px;
 	margin: 1rem 0 0;
 	padding: 0;
 	list-style: none;
 }
 
-/* start hidden (JS adds animate.css's "animated fadeInUp" when scrolled into view) */
 .js .social-item {
 	opacity: 0;
 }
@@ -767,12 +678,6 @@ a {
 	margin: 0;
 }
 
-
-/* 10. LINE-DRAW ANIMATION --------------------------------------------------
-   JS measures every stroke inside [data-draw], stores its length in --len
-   and its order in --i, then adds .draw-ready. When the drawing scrolls
-   into view JS adds .is-drawn, and the dash offset animates to 0.
-   ------------------------------------------------------------------------- */
 .draw-ready :is(path, line, polyline, polygon, rect, circle, ellipse) {
 	stroke-dasharray: var(--len) calc(var(--len) + 10px);
 	stroke-dashoffset: calc(var(--len) + 5px);
@@ -792,11 +697,6 @@ a {
 	opacity: 1;
 }
 
-
-/* 11. RESPONSIVE + REDUCED MOTION ----------------------------------------- */
-
-/* Tablets and phones: the collage's home layout becomes a two-column flow in
-   HTML order — text blocks take the full width, photos pair up side by side. */
 @media (max-width: 860px) {
 	.board {
 		gap: 56px;
@@ -848,7 +748,7 @@ a {
 	}
 
 	.city-label {
-		font-size: 50px; /* larger in SVG units so it stays readable when the drawing shrinks */
+		font-size: 50px;
 	}
 
 	.social {
@@ -871,20 +771,11 @@ a {
 	}
 }
 
-
-/* 12. CUSTOM PINK CURSOR ---------------------------------------------------
-   Small SVG cursors as data URIs, filled with the same pink as --pink-ink
-   (CSS variables can't reach inside a data URI, so the colour is written as
-   %23e46a91 — "%23" is "#"). Each has a normal system cursor as fallback.
-   Only applied to devices with a real mouse/trackpad; touch screens skip it.
-   ------------------------------------------------------------------------- */
 @media (hover: hover) and (pointer: fine) {
-	/* everywhere: pink arrow (hotspot at its tip) */
 	html {
 		cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M4 2.5V19.5l4.6-4.2 3 6.4 2.9-1.3-3-6.3h6.3z' fill='%23e46a91' stroke='%23fff' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 4 3, auto;
 	}
 
-	/* anything clickable: pink dot with a soft halo (hotspot in the centre) */
 	a,
 	button,
 	.polaroid,
@@ -893,18 +784,6 @@ a {
 	}
 }
 
-
-/* 13. FLOATING MUSIC TOGGLE ------------------------------------------------
-   Sits in the bottom-right corner over everything else. It doesn't hold the
-   audio itself — #bg-music, a plain <audio> element, does — this plays and
-   pauses it. Stopped = crossed-out speaker, with a soft halo pulsing out of
-   the circle to catch the eye; playing = music note, with the note gently
-   bobbing along. The handwritten label ("play" / "playing", written by JS)
-   sits to the left of the circle, never over it. Every state here is driven
-   by the audio element's own play/pause events, not by the click.
-   ------------------------------------------------------------------------- */
-
-/* the dock holds the label + the button, and does the fixed positioning */
 .music-dock {
 	position: fixed;
 	right: 22px;
@@ -921,7 +800,7 @@ a {
 	line-height: 1;
 	color: var(--ink-soft);
 	white-space: nowrap;
-	/* a hair less tilt than the button, like a note scribbled beside it */
+
 	transform: rotate(-3deg);
 	transition: color 0.2s ease-out;
 	pointer-events: none;
@@ -943,7 +822,7 @@ a {
 	line-height: 1;
 	background: var(--card);
 	border: 2.5px solid var(--ink);
-	/* the same wobbly hand-drawn edge the callouts use, rounded a little more */
+
 	border-radius: 48% 52% 46% 54% / 52% 46% 54% 48%;
 	box-shadow: 3px 4px 0 rgba(39, 37, 31, 0.18);
 	transform: rotate(-4deg);
@@ -961,10 +840,6 @@ a {
 	transform: rotate(-4deg) translate(1px, 2px) scale(0.98);
 }
 
-/* muted — a soft halo breathes out of the circle every 2s so the button gets
-   noticed. It only animates box-shadow, so the tilt and hover lift are untouched;
-   it stands down on hover/press to let those shadows show through. (The global
-   reduced-motion rule at the end of section 11 already stops it.) */
 .music-toggle[aria-pressed="false"] {
 	animation: music-pulse 2s ease-in-out infinite;
 }
@@ -988,14 +863,11 @@ a {
 	}
 }
 
-/* clicked, but the track has not started yet — usually the first press, while
-   the file buffers. Shows the button is thinking rather than looking broken. */
 .music-toggle.is-waiting {
 	animation: none;
 	opacity: 0.7;
 }
 
-/* playing */
 .music-toggle[aria-pressed="true"] {
 	background: var(--pink);
 }
@@ -1027,9 +899,6 @@ a {
 	}
 }
 
-
-/* audio debug read-out, only built when the URL carries ?audiodebug=1.
-   It exists because Safari on an iPhone has no console to open. */
 .audio-debug {
 	position: fixed;
 	top: 8px;

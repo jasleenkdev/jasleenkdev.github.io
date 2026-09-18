@@ -7,18 +7,14 @@
 	<title>Jasleen Kalra</title>
 	<meta name="description" content="Jasleen Kalra — scrapbook portfolio.">
 
-	<!-- Flag that JS is on, so entrance animations can start hidden without breaking no-JS visitors -->
 	<script>document.documentElement.classList.add('js');</script>
 
-	<!-- Fonts: Caveat (big handwriting) + Kalam (readable handwriting for body text) -->
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Kalam:wght@300;400;700&display=swap">
 
-	<!-- Icons for the links list and project buttons -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-	<!-- animate.css (local copy) — only used for the fadeInUp on the social links -->
 	<link rel="stylesheet" href="css/animate.css">
 	<link rel="stylesheet" href="css/scrapbook.css">
 
@@ -27,99 +23,74 @@
 
 <body>
 
-	<!-- =====================================================================
-	     DOODLE LAYER
-	     Decorative SVG doodles scattered behind the page. JS places them at
-	     random and reshuffles them whenever the shuffle zone is clicked.
-	     To add one: copy any <svg class="doodle">, change the drawing, and
-	     optionally set --size (px) and an ink-* colour class.
-	     ===================================================================== -->
 	<div class="doodle-layer" aria-hidden="true">
-		<!-- star -->
+
 		<svg class="doodle ink-yellow" style="--size: 52px" viewBox="0 0 48 48"><path d="M24 5 L29 18 L43 18 L32 27 L36 41 L24 33 L12 41 L16 27 L5 18 L19 18 Z"/></svg>
-		<!-- heart -->
+
 		<svg class="doodle ink-pink" style="--size: 46px" viewBox="0 0 48 48"><path d="M24 41 C10 31 4 22 8 14 C12 6 21 8 24 15 C27 8 36 6 40 14 C44 22 38 31 24 41 Z"/></svg>
-		<!-- spiral -->
+
 		<svg class="doodle ink-blue" style="--size: 50px" viewBox="0 0 48 48"><path d="M24 24 c2 0 3 2 2 4 c-2 3 -7 2 -8 -2 c-1 -6 5 -9 10 -8 c7 2 9 10 5 15 c-5 7 -16 6 -20 -1 c-4 -8 1 -18 10 -20"/></svg>
-		<!-- sparkle -->
+
 		<svg class="doodle ink-purple" style="--size: 40px" viewBox="0 0 48 48"><path d="M24 4 C25 18 30 23 44 24 C30 25 25 30 24 44 C23 30 18 25 4 24 C18 23 23 18 24 4 Z"/></svg>
-		<!-- flower -->
+
 		<svg class="doodle ink-orange" style="--size: 54px" viewBox="0 0 48 48"><circle cx="24" cy="13" r="6"/><circle cx="34.5" cy="21" r="6"/><circle cx="30.5" cy="33" r="6"/><circle cx="17.5" cy="33" r="6"/><circle cx="13.5" cy="21" r="6"/><circle cx="24" cy="24" r="3.5"/></svg>
-		<!-- squiggle -->
+
 		<svg class="doodle ink-green" style="--size: 60px" viewBox="0 0 48 48"><path d="M4 30 C10 18 16 18 18 26 C20 34 26 34 28 26 C30 18 36 18 38 26 C40 32 44 30 45 26"/></svg>
-		<!-- loopy arrow -->
+
 		<svg class="doodle ink-blue" style="--size: 56px" viewBox="0 0 48 48"><path d="M6 38 C14 38 18 30 16 22 C14 14 6 16 8 24 C10 32 24 34 34 20 L42 10 M42 10 L33 11 M42 10 L41 19"/></svg>
-		<!-- coffee cup -->
+
 		<svg class="doodle ink-orange" style="--size: 50px" viewBox="0 0 48 48"><path d="M10 20 H34 V32 C34 38 30 42 22 42 C14 42 10 38 10 32 Z M34 24 C42 24 42 34 34 33 M17 8 C15 11 19 13 17 16 M24 8 C22 11 26 13 24 16"/></svg>
-		<!-- music note -->
+
 		<svg class="doodle ink-purple" style="--size: 44px" viewBox="0 0 48 48"><path d="M18 36 V10 L38 6 V32"/><circle cx="14" cy="36" r="4"/><circle cx="34" cy="32" r="4"/></svg>
-		<!-- smiley -->
+
 		<svg class="doodle ink-yellow" style="--size: 48px" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="M18 20 v2 M30 20 v2 M16 29 C20 35 28 35 32 29"/></svg>
-		<!-- moon -->
+
 		<svg class="doodle ink-blue" style="--size: 42px" viewBox="0 0 48 48"><path d="M30 6 C18 8 12 20 16 30 C20 40 32 44 42 36 C30 36 22 28 24 18 C25 12 27 9 30 6 Z"/></svg>
-		<!-- second heart -->
+
 		<svg class="doodle ink-pink" style="--size: 34px" viewBox="0 0 48 48"><path d="M24 41 C10 31 4 22 8 14 C12 6 21 8 24 15 C27 8 36 6 40 14 C44 22 38 31 24 41 Z"/></svg>
-		<!-- cloud -->
+
 		<svg class="doodle ink-blue" style="--size: 58px" viewBox="0 0 48 48"><path d="M14 34 H36 C43 34 46 28 43 23 C41 19 37 18 34 19 C33 13 28 10 23 11 C18 12 15 16 15 21 C10 21 7 25 8 29 C9 32 11 34 14 34 Z"/></svg>
-		<!-- lightbulb -->
+
 		<svg class="doodle ink-yellow" style="--size: 50px" viewBox="0 0 48 48"><path d="M18 32 C18 27 12 24 12 17 C12 10 17 5 24 5 C31 5 36 10 36 17 C36 24 30 27 30 32 Z M19 37 H29 M20 42 H28 M4 17 H7 M41 17 H44 M8 5 L10 7 M40 5 L38 7"/></svg>
-		<!-- paper airplane -->
+
 		<svg class="doodle ink-purple" style="--size: 52px" viewBox="0 0 48 48"><path d="M5 22 L43 7 L32 41 L22 28 Z M43 7 L22 28 L21 38 L27 34"/></svg>
-		<!-- open book -->
+
 		<svg class="doodle ink-green" style="--size: 54px" viewBox="0 0 48 48"><path d="M24 12 C18 8 10 8 5 10 V38 C10 36 18 36 24 40 C30 36 38 36 43 38 V10 C38 8 30 8 24 12 Z M24 12 V40 M10 17 C14 16 18 16 20 17 M28 17 C30 16 34 16 38 17 M10 23 C14 22 18 22 20 23 M28 23 C30 22 34 22 38 23"/></svg>
-		<!-- camera -->
+
 		<svg class="doodle ink-pink" style="--size: 50px" viewBox="0 0 48 48"><path d="M6 16 H15 L18 11 H30 L33 16 H42 V38 H6 Z M37 21 h1"/><circle cx="24" cy="27" r="7"/></svg>
-		<!-- speech bubble -->
+
 		<svg class="doodle ink-orange" style="--size: 52px" viewBox="0 0 48 48"><path d="M8 10 H40 C42 10 43 11 43 13 V29 C43 31 42 32 40 32 H22 L13 40 V32 H8 C6 32 5 31 5 29 V13 C5 11 6 10 8 10 Z M13 18 H35 M13 24 H28"/></svg>
-		<!-- rocket -->
+
 		<svg class="doodle ink-blue" style="--size: 56px" viewBox="0 0 48 48"><path d="M24 4 C32 10 34 20 32 32 H16 C14 20 16 10 24 4 Z M16 24 L9 32 H16 M32 24 L39 32 H32 M20 36 C20 40 22 42 24 45 C26 42 28 40 28 36"/><circle cx="24" cy="18" r="4"/></svg>
-		<!-- cube -->
+
 		<svg class="doodle ink-purple" style="--size: 48px" viewBox="0 0 48 48"><path d="M24 6 L40 14 V34 L24 42 L8 34 V14 Z M8 14 L24 22 L40 14 M24 22 V42"/></svg>
-		<!-- pencil -->
+
 		<svg class="doodle ink-orange" style="--size: 46px" viewBox="0 0 48 48"><path d="M10 38 L12 30 L34 8 L40 14 L18 36 Z M12 30 L18 36 M30 12 L36 18"/></svg>
-		<!-- shooting star -->
+
 		<svg class="doodle ink-yellow" style="--size: 54px" viewBox="0 0 48 48"><path d="M30 8 L33 15 L40 16 L35 21 L36 28 L30 25 L24 28 L25 21 L20 16 L27 15 Z M18 26 L6 38 M22 32 L12 42 M14 22 L6 28"/></svg>
 	</div>
 
-	<!-- data-bg marks "empty paper": the page gutters, the blank space in the header and
-	     the gaps between sections. Clicking/tapping empty paper reshuffles the doodles
-	     and the collage blocks. -->
 	<main class="board" data-bg>
 
-		<!-- =================================================================
-		     HEADER — date + name (never moves; its blank paper still reshuffles)
-		     The date line ("september 14, 2026 · page 257") is written by JS
-		     from the visitor's own clock; "page" is the day of the year.
-		     ================================================================= -->
 		<header class="masthead" data-zone="static" data-bg>
 			<p class="masthead-date"><time data-today></time></p>
 			<div class="name-wrap">
 				<h1 class="masthead-name">Jasleen Kalra</h1>
-				<!-- hand-drawn underline that runs past the name and sweeps up into an arrow tip
-				     (draws itself in on load). x 0–420 sits under the name; 420–496 is the overhang. -->
+
 				<svg class="name-underline" viewBox="0 0 496 48" aria-hidden="true" data-draw data-bg>
 					<path d="M6 38 C 70 31, 140 44, 220 38 C 300 32, 370 42, 420 34 C 448 29, 468 20, 480 8"/>
 					<path class="underline-arrow" d="M462 13 Q 471 9.5 480 8 Q 478 16 477 25"/>
 				</svg>
 			</div>
-			<!-- EDIT ME: two lines — the second reads as a smaller, lighter subtitle -->
+
 			<p class="masthead-tagline">
 				who am I without the internet? let's not find out
 				<span class="masthead-tagline-sub">my sweet little digital footprint</span>
 			</p>
 		</header>
 
-		<!-- =================================================================
-		     STATIC ZONE — links, projects, cities
-		     Nothing in here moves when the collage shuffles.
-		     (display: contents keeps these sections in the page grid.)
-		     ================================================================= -->
 		<div class="static-zone" data-zone="static">
 
-			<!-- =============================================================
-			     LINKS — each item fades in upward (animate.css fadeInUp)
-			     Swap the hrefs; --delay staggers the entrance.
-			     ============================================================= -->
 			<section class="links" aria-labelledby="links-title">
 				<h2 class="section-title" id="links-title">links</h2>
 				<ul class="social">
@@ -142,7 +113,7 @@
 						</a>
 					</li>
 					<li class="social-item" style="--delay: 360ms; --c: var(--pink)">
-						<!-- EDIT ME: your Instagram handle -->
+
 						<a href="https://www.instagram.com/goluubombshell/" target="_blank" rel="noopener noreferrer">
 							<span class="social-icon"><i class="fa-brands fa-instagram" aria-hidden="true"></i></span>
 							<span class="social-text">instagram</span>
@@ -163,18 +134,12 @@
 				</ul>
 			</section>
 
-			<!-- =============================================================
-			     PROJECTS — three cards
-			     The title links to the demo too (same as the "code"/"demo" row).
-			     Accent colours: callout--blue / callout--peach / callout--lilac
-			     (yellow / pink / mint work as well).
-			     ============================================================= -->
 			<section class="projects" aria-labelledby="projects-title">
 				<h2 class="section-title" id="projects-title">projects</h2>
 
 				<div class="project-grid">
 					<article class="callout project-card callout--blue" style="--tilt: -1deg">
-						<!-- EDIT ME: title, description, links -->
+
 						<h3 class="callout-label"><a class="demo-link" href="https://github.com/jasleenkdev/recsys-go" target="_blank" rel="noopener noreferrer">Recsys-go ↗</a></h3>
 						<p>Recommendation microservice for GitHub repos: behavioral ANN ranking + grounded RAG search, built on Go, Postgres/pgvector, Kafka, Qdrant, Redis.</p>
 						<div class="project-links">
@@ -184,7 +149,7 @@
 					</article>
 
 					<article class="callout project-card callout--peach" style="--tilt: 1.2deg">
-						<!-- EDIT ME: title, description, links -->
+
 						<h3 class="callout-label"><a class="demo-link" href="https://github.com/jasleenkdev/arbiter" target="_blank" rel="noopener noreferrer">Arbiter ↗</a></h3>
 						<p>Multi-agent traffic signal control system using a GNN-based traffic forecasting model, autoencoder-based state compression, and a conflict-resolving orchestrator to coordinate RL-trained agents across a simulated city grid (SUMO/TraCI).</p>
 						<div class="project-links">
@@ -194,7 +159,7 @@
 					</article>
 
 					<article class="callout project-card callout--lilac" style="--tilt: -0.5deg">
-						<!-- EDIT ME: title, description, links -->
+
 						<h3 class="callout-label"><a class="demo-link" href="https://github.com/jasleenkdev/coproperty" target="_blank" rel="noopener noreferrer">Coproperty ↗</a></h3>
 						<p>CoProperty is a full-stack Web3 platform for tokenized real estate investment, enabling fractional property ownership through ERC-20 tokens, token-based governance, ownership tracking, and proportional rental income distribution.</p>
 						<div class="project-links">
@@ -205,14 +170,6 @@
 				</div>
 			</section>
 
-			<!-- =============================================================
-			     CHANDIGARH ⇄ PATIALA ROUTE
-			     Hover the left half of the sky → plane flies Chandigarh → Patiala.
-			     Hover the right half → plane flies Patiala → Chandigarh.
-			     The landmarks draw themselves in when scrolled into view.
-			     If you move the drawings, move the two ends of #flight-path too
-			     (and the .route-zone positions in the CSS).
-			     ============================================================= -->
 			<section class="route" aria-labelledby="route-title">
 				<div class="route-head">
 					<h2 class="section-title" id="route-title">chandigarh ⇄ patiala</h2>
@@ -222,7 +179,6 @@
 				<div class="route-stage">
 					<svg class="route-svg" viewBox="0 0 1000 330" aria-hidden="true">
 
-						<!-- Chandigarh: Open Hand Monument on its pedestal, with the Shivalik hills -->
 						<g class="landmark" data-draw>
 							<path d="M112 150 C 104 136, 98 124, 94 112 C 80 108, 64 100, 58 88 C 56 80, 64 76, 72 82 C 80 88, 88 92, 94 94 C 86 80, 78 62, 80 52 C 82 42, 94 42, 96 52 C 98 62, 102 72, 104 76 C 102 60, 100 42, 104 34 C 108 26, 120 26, 122 36 C 124 48, 122 62, 122 72 C 124 58, 130 40, 136 34 C 142 28, 152 32, 150 42 C 148 54, 142 66, 140 76 C 146 66, 158 54, 166 52 C 176 50, 180 60, 172 68 C 164 78, 156 92, 154 104 C 152 120, 146 136, 138 150 Z"/>
 							<path d="M120 150 V232 M130 150 V232"/>
@@ -234,7 +190,6 @@
 							<text class="city-label" x="125" y="314" text-anchor="middle">chandigarh</text>
 						</g>
 
-						<!-- Patiala: fort gateway with bastions and domes (after Qila Mubarak) -->
 						<g class="landmark" data-draw>
 							<path d="M752 258 H998"/>
 							<path d="M760 258 V168 H796 V258 M756 168 H800 M764 168 Q 764 146 778 142 Q 792 146 792 168 M778 142 V132"/>
@@ -247,47 +202,25 @@
 							<text class="city-label" x="876" y="314" text-anchor="middle">patiala</text>
 						</g>
 
-						<!-- the route itself (dashed): starts beside the hand, lands above the fort wall -->
 						<path id="flight-path" class="flight-path" d="M206 104 C 380 10, 640 10, 812 110"/>
 
-						<!-- paper plane, drawn pointing right around (0,0); JS moves it along #flight-path -->
 						<g id="plane">
 							<path class="plane-body" d="M-18 -12 L22 0 L-18 12 L-9 0 Z M-9 0 L22 0"/>
 						</g>
 					</svg>
 
-					<!-- invisible hover zones over the empty sky -->
 					<button class="route-zone route-zone--west" type="button" data-target="1" data-hint="chandigarh → patiala" aria-label="Fly the plane from Chandigarh to Patiala"></button>
 					<button class="route-zone route-zone--east" type="button" data-target="0" data-hint="patiala → chandigarh" aria-label="Fly the plane from Patiala to Chandigarh"></button>
 				</div>
 			</section>
 		</div>
 
-		<!-- =================================================================
-		     SHUFFLE ZONE — text blocks and photos mixed together
-		     Click / tap any empty paper and every block
-		     marked data-shuffle (plus the doodles) glides to a new spot inside
-		     it. Remove data-shuffle from a block to pin it in place.
-
-		     Home layout on wide screens: every block is pinned to a 12-column
-		     grid with
-		         style="--place: ROW / COLUMN / span ROWS / span COLUMNS"
-		     Rows are ~30px tall and grow if the content needs more room, so
-		     longer text pushes things down instead of overlapping.
-		     On phones/tablets the blocks flow in the order written below
-		     (photos pair up side by side, so keep them in twos).
-
-		     Photos: swap src / alt and the hover caption. Each gets a random
-		     tilt; to fix one, add --rot (e.g. --rot: -4deg) to its style.
-		     Placeholder photos come from picsum.photos.
-		     ================================================================= -->
 		<section class="collage" data-zone="shuffle" aria-label="About me and photos" data-bg>
 
-			<!-- NOW BOX — what you're up to right now -->
 			<section class="now-box" data-shuffle aria-labelledby="now-title" style="--place: 1 / 1 / span 6 / span 5">
 				<h2 class="now-title" id="now-title">now:</h2>
 				<ul class="now-list">
-					<!-- EDIT ME -->
+
 					<li><b>building</b> my way through agents, LLMs, and whatever breaks next</li>
 					<li><b>trying</b> to run 5k sub 30</li>
 					<li><b>listening to</b> daft punk, tame imphala, beach house, sufjan stevens, moby</li>
@@ -296,29 +229,28 @@
 
 			<figure class="polaroid" data-shuffle tabindex="0" style="--place: 2 / 6 / span 14 / span 3">
 				<img src="me.png" alt="Portrait of Jasleen" width="480" height="600">
-				<div class="polaroid-caption">that's me! <!-- EDIT ME --></div>
+				<div class="polaroid-caption">that's me! </div>
 			</figure>
 
 			<figure class="polaroid" data-shuffle tabindex="0" style="--place: 8 / 1 / span 14 / span 3">
-				<!-- EDIT ME: photo + caption -->
+
 				<img src="images/yosemite.jpg" alt="Yosemite valley view" width="480" height="600" loading="lazy">
 				<div class="polaroid-caption">Kyoto, Japan</div>
 			</figure>
-			
-			<!-- BIO BLURB — colour variants: callout--yellow / pink / mint / blue / peach / lilac -->
+
 			<article class="callout callout--yellow" data-shuffle style="--place: 4 / 9 / span 7 / span 4; --tilt: 1deg">
 				<h3 class="callout-label">about me</h3>
-				<p>CSE student at Thapar Institute of Engineering &amp; Technology, exploring SDE and AI/ML roles. Open to internship / full-time opportunities in India. <!-- EDIT ME --></p>
+				<p>CSE student at Thapar Institute of Engineering &amp; Technology, exploring SDE and AI/ML roles. Open to internship / full-time opportunities in India. </p>
 			</article>
-			
+
 			<figure class="polaroid polaroid--small" data-shuffle tabindex="0" style="--place: 9 / 4 / span 8 / span 2">
-				<!-- EDIT ME: photo + caption -->
+
 				<img src="images/photo2.jpg" alt="Photo" width="400" height="400" loading="lazy">
 				<div class="polaroid-caption">Dharamshala, India</div>
 			</figure>
-			
+
 			<figure class="polaroid polaroid--small" data-shuffle tabindex="0" style="--place: 12 / 10 / span 8 / span 2">
-				<!-- EDIT ME: photo + caption -->
+
 				<img src="images/photo4.jpg" alt="Photo" width="400" height="400" loading="lazy">
 				<div class="polaroid-caption">Mount Fuji, Japan</div>
 			</figure>
@@ -333,20 +265,19 @@
 			</article>
 
 			<figure class="polaroid polaroid--small" data-shuffle tabindex="0" style="--place: 23 / 1 / span 10 / span 3">
-				<!-- EDIT ME: photo + caption -->
+
 				<img src="images/photo3.jpg" alt="Placeholder photo" width="400" height="400" loading="lazy">
 				<div class="polaroid-caption">Bir, India</div>
 			</figure>
 
 			<figure class="polaroid polaroid--small" data-shuffle tabindex="0" style="--place: 21 / 10 / span 11 / span 3">
-				<!-- EDIT ME: photo + caption -->
+
 				<img src="images/photo1.jpg" alt="Placeholder photo" width="400" height="400" loading="lazy">
 				<div class="polaroid-caption">Google, Hyderabad</div>
 			</figure>
 
-			<!-- QUOTE / LINK BOX — a boxed phrase that links somewhere -->
 			<a class="quote-box taped" data-shuffle href="https://in.pinterest.com/pin/19281104652761010/" target="_blank" rel="noopener noreferrer" style="--place: 25 / 5 / span 7 / span 5">
-				<!-- EDIT ME: quote + link -->
+
 				<span class="quote-text">“  फ़ितूर और जुनून”</span>
 				<span class="quote-meta">→ quote to live by ↗</span>
 			</a>
@@ -357,25 +288,10 @@
 		</footer>
 	</main>
 
-
-	<!-- =====================================================================
-	     AUDIO
-	     Both sounds are same-origin files, so the visitor's own click is all
-	     the permission the browser needs. (This was a hidden YouTube embed
-	     driven by the IFrame Player API: it served ads, and Safari does not
-	     hand user activation to a cross-origin iframe, so un-muting it was
-	     unreliable.) The music loops itself through the `loop` attribute.
-	     ===================================================================== -->
-	<!-- EDIT ME: the background track -->
 	<audio id="bg-music" src="audio/background.mp3" loop preload="auto"></audio>
 
-	<!-- the click/pop sound effect, played on every click anywhere on the page -->
-	<!-- EDIT ME: a short, quiet royalty-free click -->
 	<audio id="click-sfx" src="audio/click.mp3" preload="auto"></audio>
 
-	<!-- floating music toggle — mutes / un-mutes (and pauses / plays) the embed.
-	     The label sits to the left of the circle so it never covers the icon; it is
-	     aria-hidden because the button's own aria-label already says the same thing. -->
 	<div class="music-dock">
 		<span class="music-toggle-label" id="music-toggle-label" aria-hidden="true">play</span>
 		<button class="music-toggle" id="music-toggle" type="button" aria-pressed="false" aria-label="Turn background music on">
