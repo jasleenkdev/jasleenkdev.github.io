@@ -360,25 +360,17 @@
 
 	<!-- =====================================================================
 	     AUDIO
-	     Background music is a YouTube embed, hidden but deliberately NOT
-	     zero-sized and NOT opacity:0 — WebKit throttles or refuses media in
-	     elements it considers invisible, which is one reason this worked in
-	     Chrome and not in Safari. So it keeps a real 320x180 box, sits behind
-	     the page (z-index:-1, behind the page) and takes no clicks. Browsers block un-muted autoplay, so it starts muted and the
-	     floating button un-mutes it through the YouTube IFrame Player API.
-	     enablejsapi=1 is what lets the API talk to this iframe; playlist=
-	     repeats the same video id as embed/ because that is how YouTube makes
-	     loop=1 work for a single video; playsinline=1 keeps iOS from taking
-	     it fullscreen.
+	     Both sounds are same-origin files, so the visitor's own click is all
+	     the permission the browser needs. (This was a hidden YouTube embed
+	     driven by the IFrame Player API: it served ads, and Safari does not
+	     hand user activation to a cross-origin iframe, so un-muting it was
+	     unreliable.) The music loops itself through the `loop` attribute.
 	     ===================================================================== -->
-	<iframe id="bg-music" width="320" height="180" title="Background music"
-		style="position: fixed; right: 0; bottom: 0; z-index: -1; border: 0; opacity: 0.004; pointer-events: none;"
-		src="https://www.youtube.com/embed/XCXXcaS9xec?autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=XCXXcaS9xec&amp;enablejsapi=1&amp;playsinline=1"
-		allow="autoplay; encrypted-media">
-	</iframe>
+	<!-- EDIT ME: the background track -->
+	<audio id="bg-music" src="audio/background.mp3" loop preload="auto"></audio>
 
 	<!-- the click/pop sound effect, played on every click anywhere on the page -->
-	<!-- EDIT ME: drop a short, quiet royalty-free click at this path -->
+	<!-- EDIT ME: a short, quiet royalty-free click -->
 	<audio id="click-sfx" src="audio/click.mp3" preload="auto"></audio>
 
 	<!-- floating music toggle — mutes / un-mutes (and pauses / plays) the embed.

@@ -896,11 +896,12 @@ a {
 
 /* 13. FLOATING MUSIC TOGGLE ------------------------------------------------
    Sits in the bottom-right corner over everything else. It doesn't hold the
-   audio itself — the hidden YouTube embed does — this just mutes/un-mutes it
-   through the IFrame Player API. Off (muted) = crossed-out speaker, with a soft
-   halo pulsing out of the circle to catch the eye; on = music note, with the
-   note gently bobbing while the track plays. The handwritten label ("play" /
-   "playing", written by JS) sits to the left of the circle, never over it.
+   audio itself — #bg-music, a plain <audio> element, does — this plays and
+   pauses it. Stopped = crossed-out speaker, with a soft halo pulsing out of
+   the circle to catch the eye; playing = music note, with the note gently
+   bobbing along. The handwritten label ("play" / "playing", written by JS)
+   sits to the left of the circle, never over it. Every state here is driven
+   by the audio element's own play/pause events, not by the click.
    ------------------------------------------------------------------------- */
 
 /* the dock holds the label + the button, and does the fixed positioning */
@@ -987,9 +988,8 @@ a {
 	}
 }
 
-/* clicked before the YouTube API had finished loading — the intent is queued,
-   so the button shows it is thinking rather than looking broken (Safari is
-   regularly slow enough here to be seen). */
+/* clicked, but the track has not started yet — usually the first press, while
+   the file buffers. Shows the button is thinking rather than looking broken. */
 .music-toggle.is-waiting {
 	animation: none;
 	opacity: 0.7;
