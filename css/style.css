@@ -127,6 +127,12 @@ dl {
 	margin-top: 12px;
 }
 
+/* one link over three lines: inline-block keeps a single focus outline */
+.pages-nav .nav-stacked {
+	display: inline-block;
+	vertical-align: top;
+}
+
 .pages-nav a[aria-current="page"] {
 	text-decoration-thickness: 3px;
 }
@@ -191,6 +197,18 @@ dl {
 .entry-meta {
 	margin: 2px 0 10px;
 	color: var(--ink-muted);
+}
+
+.entry-date {
+	margin-bottom: 0;
+}
+
+.entry-points {
+	padding-left: 22px;
+}
+
+.entry-points li + li {
+	margin-top: 6px;
 }
 
 .entry-tag {
@@ -296,6 +314,7 @@ dl {
 	.pages-nav ul {
 		display: flex;
 		flex-wrap: wrap;
+		align-items: flex-start;
 		gap: 10px 20px;
 	}
 

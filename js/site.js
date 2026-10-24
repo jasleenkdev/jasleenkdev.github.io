@@ -6,8 +6,13 @@
 		'projects': 'Projects',
 		'tech-stack': 'Tech stack',
 		'links': 'Links',
-		'education-achievements': 'Education and achievements',
+		'education-experience-achievements': 'Education, experience, achievements',
 		'blog': 'blog'
+	};
+	// old hashes that still point somewhere
+	var ALIASES = {
+		'achievements': 'education-experience-achievements',
+		'education-achievements': 'education-experience-achievements'
 	};
 	var DEFAULT_PAGE = 'about';
 	var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -31,6 +36,10 @@
 	}
 
 	function route() {
+		var old = decodeURIComponent(location.hash.slice(1));
+		if (Object.prototype.hasOwnProperty.call(ALIASES, old)) {
+			history.replaceState(null, '', '#' + ALIASES[old]);
+		}
 		var name = currentPage();
 
 		document.querySelectorAll('.page').forEach(function (page) {
