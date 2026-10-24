@@ -1,0 +1,274 @@
+:root {
+	/* swap the handwriting face here */
+	--font-hand: 'Patrick Hand', 'Segoe Print', 'Bradley Hand', cursive;
+
+	--paper: #fbf9f3;
+	--ink: #1f1d1a;
+	--ink-muted: #6b665c;
+	--focus: #3957c8;
+
+	--nav-width: 230px;
+	--content-width: 720px;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+/* graph paper lives on html (not body) and stays an SVG tile: both matter for Safari */
+html {
+	background-color: var(--paper);
+	background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='100'%20height='100'%3E%3Cg%20shape-rendering='crispEdges'%20fill='none'%3E%3Cpath%20d='M0%200.5H100M0%2020.5H100M0%2040.5H100M0%2060.5H100M0%2080.5H100M0.5%200V100M20.5%200V100M40.5%200V100M60.5%200V100M80.5%200V100'%20stroke='%235484c4'%20stroke-opacity='0.20'%20stroke-width='1'/%3E%3Cpath%20d='M0%200.5H100M0.5%200V100'%20stroke='%235484c4'%20stroke-opacity='0.34'%20stroke-width='1'/%3E%3C/g%3E%3C/svg%3E");
+	background-size: 100px 100px;
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+}
+
+body {
+	margin: 0;
+	padding: 40px 48px 80px;
+	min-height: 100vh;
+	background: transparent;
+	color: var(--ink);
+	font-family: var(--font-hand);
+	font-size: 20px;
+	line-height: 1.65;
+	overflow-wrap: break-word;
+}
+
+a {
+	color: inherit;
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 4px;
+	text-decoration-skip-ink: none;
+}
+
+a:hover {
+	text-decoration-thickness: 2px;
+}
+
+a:focus-visible {
+	outline: 2px solid var(--focus);
+	outline-offset: 3px;
+	border-radius: 2px;
+}
+
+p,
+ul,
+dl {
+	margin: 0 0 16px;
+}
+
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.muted {
+	color: var(--ink-muted);
+}
+
+/* ---------- header ---------- */
+
+.masthead {
+	margin-bottom: 48px;
+}
+
+.masthead-line {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 4px 18px;
+	margin: 0;
+}
+
+.masthead-date {
+	color: var(--ink-muted);
+	font-size: 18px;
+}
+
+.masthead-name {
+	color: #000;
+	font-size: 34px;
+	line-height: 1.2;
+}
+
+/* ---------- layout ---------- */
+
+.layout {
+	display: grid;
+	grid-template-columns: var(--nav-width) minmax(0, var(--content-width));
+	column-gap: 40px;
+	align-items: start;
+}
+
+.pages-nav ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.pages-nav li + li {
+	margin-top: 6px;
+}
+
+.pages-nav a[aria-current="page"] {
+	text-decoration-thickness: 3px;
+}
+
+.content {
+	min-width: 0;
+}
+
+/* ---------- pages ---------- */
+
+.page {
+	display: none;
+}
+
+.page.is-active {
+	display: block;
+	animation: page-in 0.25s ease-out;
+}
+
+@keyframes page-in {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.page.is-active {
+		animation: none;
+	}
+}
+
+.label {
+	margin: 0 0 4px;
+	color: var(--ink-muted);
+	font-size: 20px;
+	font-weight: normal;
+}
+
+.label:not(:first-of-type) {
+	margin-top: 32px;
+}
+
+/* projects and achievements */
+
+.entry + .entry {
+	margin-top: 44px;
+}
+
+.entry-title {
+	margin: 0;
+	font-size: 24px;
+	font-weight: normal;
+	line-height: 1.3;
+}
+
+.entry-meta {
+	margin: 2px 0 10px;
+	color: var(--ink-muted);
+}
+
+.entry-points {
+	padding-left: 22px;
+}
+
+.entry-points li + li {
+	margin-top: 6px;
+}
+
+.entry-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 20px;
+	margin: 0;
+}
+
+/* tech stack */
+
+.stack {
+	margin: 0;
+}
+
+.stack-row {
+	display: grid;
+	grid-template-columns: 190px minmax(0, 1fr);
+	column-gap: 24px;
+}
+
+.stack-row + .stack-row {
+	margin-top: 16px;
+}
+
+.stack dt {
+	color: var(--ink-muted);
+}
+
+.stack dd {
+	margin: 0;
+}
+
+/* links */
+
+.link-list {
+	padding: 0;
+	list-style: none;
+}
+
+.link-list li + li {
+	margin-top: 8px;
+}
+
+/* ---------- narrow screens ---------- */
+
+@media (max-width: 760px) {
+	body {
+		padding: 28px 20px 56px;
+	}
+
+	.masthead {
+		margin-bottom: 28px;
+	}
+
+	.masthead-name {
+		font-size: 30px;
+	}
+
+	.layout {
+		grid-template-columns: minmax(0, 1fr);
+		row-gap: 32px;
+	}
+
+	.pages-nav ul {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px 20px;
+	}
+
+	.pages-nav li + li {
+		margin-top: 0;
+	}
+
+	.stack-row {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
