@@ -53,13 +53,9 @@
 				<h2 class="visually-hidden" id="projects-title">Projects</h2>
 
 				<article class="entry">
-					<h3 class="entry-title">FirstPR – Open-Source Project Recommender</h3>
+					<h3 class="entry-title">FirstPR</h3>
 					<p class="entry-meta">PyTorch, BigQuery, FastAPI, Groq</p>
-					<ul class="entry-points">
-						<li>Built a live app recommending beginner-friendly GitHub issues, with a BigQuery pipeline over 32.7k issues in 4.6k projects; compared 12 models incl. graph (LightGCN) and Transformer (SASRec), the best 42% more accurate than baseline.</li>
-						<li>Evaluated on 14.2k real first-time contributors (Hacktoberfest 2025): the top-20 picks contained the project they actually joined 24.6% of the time, 12× better than popularity.</li>
-						<li>Built LLM evals: grounding checks (90% grounded outputs), LLM-as-a-judge scoring of 25 test personas, and a guard that blocks hallucinated names.</li>
-					</ul>
+					<p>I built this to help CS students find a first open-source contribution. It matches beginner-friendly repos and specific issues to your skills, interests and available time, and explains why using real signals. Under the app is a benchmark where I rebuilt recommender systems in historical order, from popularity and matrix factorisation up to SASRec, LightGCN and LLM rerankers, and scored them all on the same split. The app runs whichever one actually won. On 14.2k real first-time contributors, its top 20 contained the project they went on to join 24.6% of the time, 12× better than recommending popular repos.</p>
 					<p class="entry-links">
 						<a href="https://github.com/jasleenkdev/firstpr" target="_blank" rel="noopener noreferrer">github</a>
 						<a href="https://firstpr-pied.vercel.app" target="_blank" rel="noopener noreferrer">website</a>
@@ -68,11 +64,8 @@
 
 				<article class="entry">
 					<h3 class="entry-title">Agentic Code Intelligence</h3>
-					<p class="entry-meta">Python, Embeddings, Vector Search, MTEB</p>
-					<ul class="entry-points">
-						<li>Built a CPU-only embedding-based code retrieval system for plain-English questions; scored NDCG@10 0.866 and MRR@10 0.838 on the APPS task of the Code Information Retrieval (CoIR) benchmark, matching a model 3× larger.</li>
-						<li>Added incremental re-indexing (470s → 0.8s per changed file) and version-lineage grouping that raised cross-version NDCG@10 from 0.56 to 0.74.</li>
-					</ul>
+					<p class="entry-meta">Python, embeddings, vector search, MTEB</p>
+					<p>You type a question in plain English and it finds the right piece of code, running entirely on a laptop CPU with no API calls. I built it for the Samsung PRISM GenAI Hackathon, where it reached the final round. On the CoIR APPS benchmark it scored 0.866 NDCG@10, matching a model three times its size, and I only tuned on the training split. It also searches a codebase across git versions: it re-embeds only the files that changed (470 seconds down to 0.8) and groups the same function across versions.</p>
 					<p class="entry-links">
 						<a href="https://github.com/jasleenkdev/agentic_code_intelligence" target="_blank" rel="noopener noreferrer">github</a>
 						<a href="https://drive.google.com/file/d/1Br9rfmWd3nyecw0P59VIBUnEA8tTfnxu/view" target="_blank" rel="noopener noreferrer">demo</a>
@@ -80,15 +73,52 @@
 				</article>
 
 				<article class="entry">
-					<h3 class="entry-title">Real-Time Repository Recommendation Service</h3>
-					<p class="entry-meta">Go, Qdrant, pgvector, Kafka, Redis, Ollama</p>
-					<ul class="entry-points">
-						<li>Built a recommendation engine ranking 600+ GitHub repos by combining vector similarity (Qdrant) with popularity signals, with rankings updated in real time through a Kafka pipeline.</li>
-						<li>Served embedding-based RAG search over 4,690 indexed READMEs, returning paginated results in 6.5–11.7ms.</li>
-					</ul>
+					<h3 class="entry-title">Arbiter</h3>
+					<p class="entry-meta">SUMO, PyTorch, PyTorch Geometric, Stable-Baselines3, React + TypeScript</p>
+					<p>I wanted to know what happens when you swap fixed-timer traffic lights for AI agents that each only care about their own junction. In my simulation the whole network got 53% worse, because every agent’s gain was paid for by a neighbouring junction with nobody defending it. I then tried six ways of coordinating them, and none beat the plain timer overall. Each one just moved the damage somewhere else, and working out why is the actual result. The live page streams one simulated run of the best setup.</p>
+					<p class="entry-links">
+						<a href="https://github.com/jasleenkdev/arbiter" target="_blank" rel="noopener noreferrer">github</a>
+						<a href="https://arbiter-rose.vercel.app/" target="_blank" rel="noopener noreferrer">live</a>
+					</p>
+				</article>
+
+				<article class="entry">
+					<h3 class="entry-title">Research Copilot</h3>
+					<p class="entry-meta">Python, LangChain, LangGraph, arXiv</p>
+					<p>A research assistant where four AI roles split the work on one question. A supervisor decides what happens next, a researcher searches arXiv, a writer drafts the answer, and a critic checks that every paper cited really exists. I built it phase by phase to learn LangChain and LangGraph, from a single chain to a multi-agent graph with human approval, streaming, retries, and an evaluation setup that scores repeated runs with confidence intervals instead of trusting one good run.</p>
+					<p class="entry-links">
+						<a href="https://github.com/jasleenkdev/research-copilot" target="_blank" rel="noopener noreferrer">github</a>
+						<a href="https://research-copilot-neon.vercel.app/" target="_blank" rel="noopener noreferrer">live</a>
+					</p>
+				</article>
+
+				<article class="entry">
+					<h3 class="entry-title">recsys-go</h3>
+					<p class="entry-meta">Go, PostgreSQL + pgvector, Qdrant, Kafka, Redis, Ollama</p>
+					<p>A GitHub repo recommender built as a systems exercise more than a model one. Starring or viewing a repo fires an event through Kafka that recomputes your taste vector, so the next page load shifts. Search is grounded: answers come only from README chunks that clear a relevance threshold, and if nothing is relevant enough it says so instead of guessing. A brand-new user gets a clearly labelled popular-repos fallback. It runs on 600 real repos and 4,690 README chunks.</p>
 					<p class="entry-links">
 						<a href="https://github.com/jasleenkdev/recsys-go" target="_blank" rel="noopener noreferrer">github</a>
 						<a href="https://drive.google.com/file/d/1dl1hamB1jSE3rfImWa0khSCi4FxeA_4Q/view" target="_blank" rel="noopener noreferrer">demo</a>
+					</p>
+				</article>
+
+				<article class="entry">
+					<h3 class="entry-title">CoProperty <span class="entry-tag">team project</span></h3>
+					<p class="entry-meta">React, Django REST, Solidity, Hardhat, Web3.py</p>
+					<p>Fractional real estate on a blockchain. A property is split into tokens, you buy a share, rent is paid out to token holders in proportion to what they own, and holders can vote on proposals. A Django API talks to the Solidity contract through Web3.py, and the React frontend uses wallet login. It runs on a local test blockchain, so it’s a working prototype, not something handling real money. Built with a team; I worked on the Django API and the Web3 service that mints the tokens.</p>
+					<p class="entry-links">
+						<a href="https://github.com/jasleenkdev/coproperty" target="_blank" rel="noopener noreferrer">github</a>
+						<a href="https://drive.google.com/file/d/1dHDMO8G_KqmfnMU3InNHPJD9yLOd4jGb/view?usp=drivesdk" target="_blank" rel="noopener noreferrer">demo</a>
+					</p>
+				</article>
+
+				<article class="entry">
+					<h3 class="entry-title">Multiplayer Jigsaw <span class="entry-tag">team project</span></h3>
+					<p class="entry-meta">Elixir, Phoenix Channels, JavaScript</p>
+					<p>A jigsaw puzzle in the browser that you can solve with friends. Pick an image and a difficulty (9, 25 or 100 pieces), share the link, and everyone sees pieces move live. We built it as a team to learn Elixir and Phoenix. There’s no database: moves are broadcast over Phoenix Channels, and the shared channel is the source of truth. A small Python script cuts every image into pieces for every difficulty automatically.</p>
+					<p class="entry-links">
+						<a href="https://github.com/jasleenkdev/jigsaw-puzzle-phoenix" target="_blank" rel="noopener noreferrer">github</a>
+						<a href="https://jigsaw-puzzle-phoenix.onrender.com" target="_blank" rel="noopener noreferrer">live</a>
 					</p>
 				</article>
 			</section>

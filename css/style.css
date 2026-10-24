@@ -193,12 +193,11 @@ dl {
 	color: var(--ink-muted);
 }
 
-.entry-points {
-	padding-left: 22px;
-}
-
-.entry-points li + li {
-	margin-top: 6px;
+.entry-tag {
+	margin-left: 8px;
+	color: var(--ink-muted);
+	font-size: 17px;
+	white-space: nowrap;
 }
 
 .entry-links {
