@@ -6,7 +6,7 @@
 		'projects': 'Projects',
 		'tech-stack': 'Tech stack',
 		'links': 'Links',
-		'achievements': 'Achievements'
+		'education-achievements': 'Education and achievements'
 	};
 	var DEFAULT_PAGE = 'about';
 	var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

@@ -118,8 +118,13 @@ dl {
 	list-style: none;
 }
 
+.pages-nav li {
+	line-height: 1.35;
+}
+
+/* items sit further apart than wrapped lines within one item */
 .pages-nav li + li {
-	margin-top: 6px;
+	margin-top: 12px;
 }
 
 .pages-nav a[aria-current="page"] {
@@ -261,7 +266,7 @@ dl {
 	.pages-nav ul {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 6px 20px;
+		gap: 10px 20px;
 	}
 
 	.pages-nav li + li {
